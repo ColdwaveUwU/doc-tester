@@ -48,44 +48,21 @@ module.exports = class Tester {
     }
 
     async downloadFile(extension, frameName = "frameEditor") {
-        const fileType = {
-            docx: 1,
-            pdf: 2,
-            odt: 3,
-            docxf: 4,
-            oform: 5,
-            dotx: 7,
-            pdfa: 8,
-            ott: 9,
-            rtf: 11,
-            txt: 12,
-            fb2: 13,
-            epub: 14,
-            html: 15,
-            jpg: 17,
-            png: 18,
-        };
         const frame = this.page
             .frames()
             .find((frame) => frame.name() === frameName);
-        const fileButton =
-            "#toolbar > div > div.box-tabs > section > ul > li.ribtab.x-lone.canedit > a";
-        const number = fileType[extension];
-        const extensionVal = `#panel-saveas > div.content-container > div.format-items > div:nth-child(${number}) > div > div`;
+        const fileButton = 'li[data-layout-name="toolbar-file"]';
+        const extensionVal = `.svg-format-${extension}`;
         await frame.waitForSelector(fileButton);
         await frame.click(fileButton);
-        if (number) {
-            if (number === fileType.txt || number === fileType.rtf) {
-                await frame.waitForSelector(extensionVal);
-                await frame.click(extensionVal);
-                await this.keyDown("Enter"); //разобраться как нормально реализовать
-                await this.keyDown("Enter"); //+
-            } else {
-                await frame.waitForSelector(extensionVal);
-                await frame.click(extensionVal);
-            }
+        if (extension === "rtf" || extension === "txt") {
+            await frame.waitForSelector(extensionVal);
+            await frame.click(extensionVal);
+            await this.keyPress("Enter"); //разобраться как нормально реализовать
+            await this.keyPress("Enter"); //+
         } else {
-            console.log("Invalid file extension.");
+            await frame.waitForSelector(extensionVal);
+            await frame.click(extensionVal);
         }
     }
 

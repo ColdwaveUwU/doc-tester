@@ -22,7 +22,7 @@ const tester = require("./Tester");
             await myTester.keyPress("ArrowLeft");
         }
         await myTester.keyUp("Shift");
-        await myTester.downloadFile("txt");
+        await myTester.downloadFile("rtf");
         //await myTester.close();
     } catch (error) {
         console.error("Error occurred:", error);
