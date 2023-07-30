@@ -65,7 +65,7 @@ module.exports = class Tester {
             jpg: 17,
             png: 18,
         };
-        let frame = this.page
+        const frame = this.page
             .frames()
             .find((frame) => frame.name() === frameName);
         const fileButton =
