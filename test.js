@@ -2,7 +2,7 @@ const tester = require("./Tester");
 (async function (window, undefined) {
     const config = {
         pressSlow: 50, //'userspeed'
-        executablePath: '/Program Files/Google/Chrome/Application/chrome.exe',
+        executablePath: "/Program Files/Google/Chrome/Application/chrome.exe",
     };
     const myTester = new tester.Tester(config);
     try {
@@ -22,6 +22,8 @@ const tester = require("./Tester");
             await myTester.keyPress("ArrowLeft");
         }
         await myTester.keyUp("Shift");
+        await myTester.downloadFile("txt");
+        //await myTester.close();
     } catch (error) {
         console.error("Error occurred:", error);
     }

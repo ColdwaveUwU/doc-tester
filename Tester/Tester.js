@@ -17,7 +17,7 @@ module.exports = class Tester {
     }
 
     async waitEditor() {
-        await this.page.waitForTimeout(10000);
+        await this.page.waitForTimeout(10000); //доделать
     }
 
     async load(url) {
@@ -47,9 +47,56 @@ module.exports = class Tester {
         this.page.mouse.click(x, y);
     }
 
-    //async downloadFile() todo
+    async downloadFile(extension, frameName = "frameEditor") {
+        const fileType = {
+            docx: 1,
+            pdf: 2,
+            odt: 3,
+            docxf: 4,
+            oform: 5,
+            dotx: 7,
+            pdfa: 8,
+            ott: 9,
+            rtf: 11,
+            txt: 12,
+            fb2: 13,
+            epub: 14,
+            html: 15,
+            jpg: 17,
+            png: 18,
+        };
+        let frame = this.page
+            .frames()
+            .find((frame) => frame.name() === frameName);
+        const fileButton =
+            "#toolbar > div > div.box-tabs > section > ul > li.ribtab.x-lone.canedit > a";
+        const number = fileType[extension];
+        const extensionVal = `#panel-saveas > div.content-container > div.format-items > div:nth-child(${number}) > div > div`;
+        await frame.waitForSelector(fileButton);
+        await frame.click(fileButton);
+        if (number) {
+            if (number === fileType.txt || number === fileType.rtf) {
+                await frame.waitForSelector(extensionVal);
+                await frame.click(extensionVal);
+                await this.keyDown("Enter"); //разобраться как нормально реализовать
+                await this.keyDown("Enter"); //+
+            } else {
+                await frame.waitForSelector(extensionVal);
+                await frame.click(extensionVal);
+            }
+        } else {
+            console.log("Invalid file extension.");
+        }
+    }
 
     async waitAutosave() {
         await this.page.waitForTimeout(3000);
+    }
+
+    async close() {
+        if (this.browser) {
+            await this.browser.close();
+            this.browser = null;
+        }
     }
 };
