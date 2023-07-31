@@ -60,7 +60,6 @@ if is_dir(test_file):
 with open(config_path, "r") as config_file:
     config_content = config_file.read()
 
-print(config_content)
 config = json.loads(config_content)
 for test in tests_array:
     print("run test: " + test)
