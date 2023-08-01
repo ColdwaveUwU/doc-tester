@@ -1,13 +1,14 @@
 const puppeteer = require("puppeteer");
-
-module.exports = class Tester {
+const fs = require("fs");
+const path = require("path");
+class TesterImp {
     constructor(config) {
         this.browserOptions = {
             headless: false,
-            slowMo: config.pressSlow || null,
-            executablePath: config.executablePath || null,
+            slowMo: config.config.pressSlow,
+            executablePath: config.config.executablePath,
         };
-        this.browser = null;
+        this.browser = config.browser;
         this.page = null;
     }
 
@@ -76,4 +77,24 @@ module.exports = class Tester {
             this.browser = null;
         }
     }
-};
+}
+
+const fileName = "%%CONFIG%%";
+const filePath = path.resolve(__dirname, "..", fileName);
+
+fs.readFile(filePath, "utf8", (err, data) => {
+    if (err) {
+        console.error("File reading error:", err);
+        return;
+    }
+    try {
+        const config = JSON.parse(data);
+        console.log("Contents of the JSON file:", config);
+        const Tester = new TesterImp(config);
+        (async () => {
+            "%%CODE%%";
+        })();
+    } catch (error) {
+        console.error("Error when parsing JSON:", error);
+    }
+});
