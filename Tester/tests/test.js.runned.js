@@ -136,7 +136,7 @@ class TesterImp {
     }
 }
 
-const fileName = "%%CONFIG%%";
+const fileName = "config_chrome.json";
 const filePath = path.resolve(__dirname, "..", fileName);
 
 fs.readFile(filePath, "utf8", async (err, data) => {
@@ -148,7 +148,30 @@ fs.readFile(filePath, "utf8", async (err, data) => {
         const config = JSON.parse(data);
         console.log("Contents of the JSON file:", config);
         const Tester = new TesterImp(config);
-        "%%CODE%%"
+        await Tester.launch();
+await Tester.load("https://doc-linux.teamlab.info/example/editor?fileName=new.docx");
+await Tester.waitEditor();
+await Tester.keyPress("Enter");
+// type text
+await Tester.input("Hello World!");
+//await Tester.relativeClick('#id-toolbar-btn-bold', 10, 20)
+await Tester.keyPress("ArrowLeft");
+await Tester.keyDown("Shift");
+for (let i = 0; i < 5; i++)
+  await Tester.keyPress("ArrowLeft");
+await Tester.keyUp("Shift");
+// bold ???
+await Tester.mouseClickInsideElement('#toolbar',81, 65);
+//italic -> file
+await Tester.click(['#id-toolbar-btn-italic', 'li[data-layout-name="toolbar-file"]']);
+// if needed
+await Tester.waitAutosave();
+// await Tester.downloadFile("docx")
+// await Tester.downloadFile("odt")
+// await Tester.close(true);
+
+
+
     } catch (error) {
         console.error("Error when parsing JSON:", error);
     }
