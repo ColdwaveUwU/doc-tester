@@ -17,7 +17,7 @@ class TesterImp {
         this.page = await this.browser.newPage();
     }
     async waitEditor(frameName = "frameEditor") {
-        const waitTime = 90000;
+        const waitTime = 60000;
         const frame = this.page
             .frames()
             .find((frame) => frame.name() === frameName);
@@ -83,6 +83,11 @@ class TesterImp {
         await this.page.keyboard.up(key);
     }
     async mouseClickInsideElement(selector, x, y, frameName = "frameEditor") {
+        const offset = {
+            x: x,
+            y: y,
+        };
+
         const frame = this.page
             .frames()
             .find((frame) => frame.name() === frameName);
@@ -98,29 +103,31 @@ class TesterImp {
                 `Element with selector "${selector}" has no box model.`
             );
         }
-        const offset = {
-            x: x,
-            y: y,
-        };
         await elementHandle.click({ offset: offset });
     }
 
-    async downloadFile(extension, frameName = "frameEditor") {
-        const frame = this.page
-            .frames()
-            .find((frame) => frame.name() === frameName);
+    async downloadFile(extension, txtEncoding = "Unicode (UTF-8)",frameName = "frameEditor") {
         const fileButton = 'li[data-layout-name="toolbar-file"]';
         const extensionVal = `.svg-format-${extension}`;
-        await frame.waitForSelector(fileButton);
-        await frame.click(fileButton);
-        if (extension === "rtf" || extension === "txt") {
-            await frame.waitForSelector(extensionVal);
-            await frame.click(extensionVal);
-            await this.keyPress("Enter"); //разобраться как нормально реализовать
-            await this.keyPress("Enter"); //+
-        } else {
-            await frame.waitForSelector(extensionVal);
-            await frame.click(extensionVal);
+        const dialogSelector = '.asc-window.modal.alert.notransform';
+        const okButtonSelector = `${dialogSelector} button[result="ok"]`;
+		const elementSelector = 'button.btn.btn-default.dropdown-toggle';
+        if (extension === "rtf") {
+            await this.click([fileButton, extensionVal, dialogSelector, okButtonSelector]);
+            
+        } else if (extension === "txt") { // Node is either not clickable or not an HTMLElement
+            await this.click([fileButton,extensionVal, okButtonSelector]); 
+            const frame = this.page.frames().find(frame => frame.name() === frameName);
+            const elementExists = await frame.evaluate(selector => {
+                const element = document.querySelector(selector);
+                return element !== null;
+            }, elementSelector);
+            console.log(elementExists); //true
+            if(elementExists) {
+                await this.click(elementSelector);
+            }
+        }else {
+            await this.click([fileButton, extensionVal]);
         }
     }
 

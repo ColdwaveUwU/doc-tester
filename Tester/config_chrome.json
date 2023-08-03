@@ -1,8 +1,8 @@
 {
-    "browser": "",
+    "browser": "chrome",
     "config": {
         "headless": false,
         "pressSlow": 50,
-        "executablePath": ""
+        "executablePath": "/Program Files/Google/Chrome/Application/chrome.exe"
     }
 }
