@@ -51,7 +51,8 @@ class TesterImp {
         }
     }
 
-    async load(url) {
+    async load(fileName) {
+        const url = `https://doc-linux.teamlab.info/example/editor?fileName=${fileName}`;
         await this.page.goto(url);
     }
     async click(buttonSelectors, frameName = "frameEditor") {
@@ -106,27 +107,38 @@ class TesterImp {
         await elementHandle.click({ offset: offset });
     }
 
-    async downloadFile(extension, txtEncoding = "Unicode (UTF-8)",frameName = "frameEditor") {
+    async downloadFile(
+        extension,
+        txtEncoding = "Unicode (UTF-8)",
+        frameName = "frameEditor"
+    ) {
         const fileButton = 'li[data-layout-name="toolbar-file"]';
         const extensionVal = `.svg-format-${extension}`;
-        const dialogSelector = '.asc-window.modal.alert.notransform';
+        const dialogSelector = ".asc-window.modal.alert.notransform";
         const okButtonSelector = `${dialogSelector} button[result="ok"]`;
-		const elementSelector = 'button.btn.btn-default.dropdown-toggle';
+        const elementSelector = "button.btn.btn-default.dropdown-toggle";
         if (extension === "rtf") {
-            await this.click([fileButton, extensionVal, dialogSelector, okButtonSelector]);
-            
-        } else if (extension === "txt") { // Node is either not clickable or not an HTMLElement
-            await this.click([fileButton,extensionVal, okButtonSelector]); 
-            const frame = this.page.frames().find(frame => frame.name() === frameName);
-            const elementExists = await frame.evaluate(selector => {
+            await this.click([
+                fileButton,
+                extensionVal,
+                dialogSelector,
+                okButtonSelector,
+            ]);
+        } else if (extension === "txt") {
+            // Node is either not clickable or not an HTMLElement
+            await this.click([fileButton, extensionVal, okButtonSelector]);
+            const frame = this.page
+                .frames()
+                .find((frame) => frame.name() === frameName);
+            const elementExists = await frame.evaluate((selector) => {
                 const element = document.querySelector(selector);
                 return element !== null;
             }, elementSelector);
             console.log(elementExists); //true
-            if(elementExists) {
+            if (elementExists) {
                 await this.click(elementSelector);
             }
-        }else {
+        } else {
             await this.click([fileButton, extensionVal]);
         }
     }
