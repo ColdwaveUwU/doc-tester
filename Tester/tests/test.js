@@ -14,6 +14,9 @@ Tester.mouseClickInsideElement("#toolbar", 81, 65);
 Tester.click(["#id-toolbar-btn-italic", "#id-toolbar-btn-underline"]);
 // if needed
 Tester.waitAutosave();
-Tester.downloadFile("rtf");
-// Tester.downloadFile("odt")
+//try "https://w.forfun.com/fetch/4a/4af0bcc2b0c34fd573eca9f1be9ab245.jpeg" or testFile.png
+//0 - fromdir 1 - url 2 - storage
+Tester.insertPicture(0, "testFile.png");
+//Tester.downloadFile("txt");
+//Tester.downloadFile("odt")
 // Tester.close(true);

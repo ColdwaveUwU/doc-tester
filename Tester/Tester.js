@@ -136,13 +136,48 @@ class TesterImp {
             }, elementSelector);
             console.log(elementExists); //true
             if (elementExists) {
-                await this.click(elementSelector);
+                await this.click(".dropdown-toggle");
             }
         } else {
             await this.click([fileButton, extensionVal]);
         }
     }
 
+    async insertPicture(insertOption = 0, file, frameName = "frameEditor") {
+        const insertButton =
+            'li.canedit a[data-tab="ins"][data-title="Insert"][data-hint="0"][data-hint-direction="bottom"][data-hint-offset="small"][data-hint-title="I"]';
+        const imageButton = "#slot-btn-insimage";
+        const filePath = path.join(__dirname, "picture", `${file}`);
+        await this.click([insertButton, imageButton]);
+        if (insertOption === 0) {
+            const fromFile = "#asc-gen237";
+            const [fileChooser] = await Promise.all([
+                this.page.waitForFileChooser(),
+                this.click(fromFile),
+            ]);
+
+            await fileChooser.accept([filePath]);
+        } else if (insertOption === 1) {
+            const fromUrlSelector = "#asc-gen239";
+            const inputFormSelector =
+                '.asc-window.modal.modal-dlg.notransform #id-dlg-url input[type="text"]';
+            const okButtonSelector =
+                'button[class="btn normal dlg-btn primary"][result="ok"]';
+            await this.click(fromUrlSelector);
+            const frame = this.page
+                .frames()
+                .find((frame) => frame.name() === frameName);
+            await frame.waitForSelector(inputFormSelector);
+            const input = await frame.$(inputFormSelector);
+            await input.type(`${file}`);
+            await this.click(okButtonSelector);
+        } else if (insertOption === 2) {
+            const fromStorageSelector = "#asc-gen241";
+            await this.click(fromStorageSelector);
+        } else {
+            throw new Error("Incorrect file insertion method");
+        }
+    }
     async waitAutosave() {
         await this.page.waitForTimeout(3000);
     }
