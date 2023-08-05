@@ -142,14 +142,20 @@ class TesterImp {
             await this.click([fileButton, extensionVal]);
         }
     }
-
-    async insertPicture(insertOption = 0, file, frameName = "frameEditor") {
-        const insertButton =
-            'li.canedit a[data-tab="ins"][data-title="Insert"][data-hint="0"][data-hint-direction="bottom"][data-hint-offset="small"][data-hint-title="I"]';
+    /** @typedef {'from_file' | 'from_url' | 'from_storage'} InsertOption */
+    /**
+     * @param {string} file
+     * @param {InsertOption} insertOption
+     */
+    async insertPicture(file, insertOption = "From_File") {
+        insertOption = insertOption.toLowerCase();
+        const frameName = "frameEditor";
+        const insertButton = 'li a[data-tab="ins"][data-title="Insert"]';
         const imageButton = "#slot-btn-insimage";
         const filePath = path.join(__dirname, "picture", `${file}`);
+
         await this.click([insertButton, imageButton]);
-        if (insertOption === 0) {
+        if (insertOption === "from_file") {
             const fromFile = "#asc-gen237";
             const [fileChooser] = await Promise.all([
                 this.page.waitForFileChooser(),
@@ -157,12 +163,10 @@ class TesterImp {
             ]);
 
             await fileChooser.accept([filePath]);
-        } else if (insertOption === 1) {
+        } else if (insertOption === "from_url") {
             const fromUrlSelector = "#asc-gen239";
-            const inputFormSelector =
-                '.asc-window.modal.modal-dlg.notransform #id-dlg-url input[type="text"]';
-            const okButtonSelector =
-                'button[class="btn normal dlg-btn primary"][result="ok"]';
+            const inputFormSelector = "input.form-control";
+            const okButtonSelector = 'button[result="ok"]';
             await this.click(fromUrlSelector);
             const frame = this.page
                 .frames()
@@ -171,7 +175,7 @@ class TesterImp {
             const input = await frame.$(inputFormSelector);
             await input.type(`${file}`);
             await this.click(okButtonSelector);
-        } else if (insertOption === 2) {
+        } else if (insertOption === "from_storage") {
             const fromStorageSelector = "#asc-gen241";
             await this.click(fromStorageSelector);
         } else {
