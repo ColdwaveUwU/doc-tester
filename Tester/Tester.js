@@ -89,9 +89,9 @@ class TesterImp {
             throw new Error("Error");
         }
         console.log(buttonSelectors);
-        const frame = await this.findFrameByName(frameName);
 
         for (const buttonSelector of buttonSelectors) {
+            const frame = await this.findFrameByName(frameName);
             await frame.waitForSelector(buttonSelector);
             await frame.click(buttonSelector);
         }
@@ -137,7 +137,6 @@ class TesterImp {
             x: x,
             y: y,
         };
-
         const frame = await this.findFrameByName(frameName);
         const elementHandle = await frame.$(selector);
 
@@ -199,9 +198,12 @@ class TesterImp {
      * @throws {Error}
      * @returns {Promise<void>}
      */
-    async insertPicture(file, insertOption = "From_File") {
+    async insertPicture(
+        file,
+        insertOption = "From_File",
+        frameName = "frameEditor"
+    ) {
         insertOption = insertOption.toLowerCase();
-        const frameName = "frameEditor";
         const insertButton = 'li a[data-tab="ins"][data-title="Insert"]';
         const imageButton = "#slot-btn-insimage";
         const filePath = path.join(__dirname, "picture", `${file}`);
@@ -242,7 +244,7 @@ class TesterImp {
 
     async drawFunction() {
         const drawButton = 'li a[data-tab="draw"][data-title="Draw"]';
-        await this.click(drawButton);
+        await this.click([drawButton]);
     }
     /**
      * @returns {Promise<void>}
