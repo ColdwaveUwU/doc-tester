@@ -241,10 +241,48 @@ class TesterImp {
                 throw new Error("Incorrect file insertion method");
         }
     }
+    /**
+     * @param {number} endX
+     * @param {number} endY
+     * @returns {Promise<void>}
+     */
+    async mouseDrawingLine(endX, endY) {
+        const elementSelector = "#id_main_view";
+        const frame = await this.findFrameByName("frameEditor");
+        const elementHandle = await frame.$(elementSelector);
+    
+        if (!elementHandle) {
+            throw new Error(
+                `Element with selector "${elementSelector}" not found.`
+            );
+        }
+    
+        await elementHandle.hover();
+    
+        console.log("Dragging to:", endX, endY);
+    
+        await elementHandle.mouse.down({ button: "left"});
+        await this.page.mouse.move(endX, endY);
+        await this.page.mouse.up({ button: "left" });
+    }
+    
 
-    async drawFunction() {
+    async drawFunction(drawOption, color, size = 1) {
         const drawButton = 'li a[data-tab="draw"][data-title="Draw"]';
+        const penOne = [
+            "#asc-gen592 > button",
+            "#asc-gen592 > button.dropdown-toggle",
+            `#asc-gen592 div > a[color-name="${color}"]`,
+        ];
         await this.click([drawButton]);
+        if (drawOption === "pen_1") {
+            await this.click(penOne);
+            await this.mouseDrawingLine(40, 50);
+        } else if (drawOption === "pen_2") {
+        } else if (drawOption === "highlighter") {
+        } else {
+            throw new Error("Invalid draw option");
+        }
     }
     /**
      * @returns {Promise<void>}

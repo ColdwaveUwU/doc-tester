@@ -17,7 +17,7 @@ Tester.waitAutosave();
 //try "https://w.forfun.com/fetch/4a/4af0bcc2b0c34fd573eca9f1be9ab245.jpeg" or testFile.png
 //0 - fromdir 1 - url 2 - storage
 Tester.insertPicture("testFile.png", 'from_file');
-Tester.drawFunction();
+Tester.drawFunction('pen_1', 'Blue');
 //Tester.downloadFile("txt");
 //Tester.downloadFile("odt")
 // Tester.close(true);
