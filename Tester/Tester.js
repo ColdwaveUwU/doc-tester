@@ -11,11 +11,17 @@ class TesterImp {
         this.browser = config.browser;
         this.page = null;
     }
-
+    /**
+     * @returns {Promise<void>}
+     */
     async launch() {
         this.browser = await puppeteer.launch(this.browserOptions);
         this.page = await this.browser.newPage();
     }
+    /**
+     * @param {string} [frameName="frameEditor"]
+     * @returns {Promise<void>}
+     */
     async waitEditor(frameName = "frameEditor") {
         const waitTime = 60000;
         const frame = this.page
@@ -50,11 +56,20 @@ class TesterImp {
             console.log("Error loading the editor.");
         }
     }
-
+    /**
+     * @param {string} fileName
+     * @returns {Promise<void>}
+     */
     async load(fileName) {
         const url = `https://doc-linux.teamlab.info/example/editor?fileName=${fileName}`;
         await this.page.goto(url);
     }
+    /**
+     * @param {string|string[]} buttonSelectors
+     * @param {string} [frameName="frameEditor"]
+     * @throws {Error}
+     * @returns {Promise<void>}
+     */
     async click(buttonSelectors, frameName = "frameEditor") {
         if (typeof buttonSelectors === "string") {
             buttonSelectors = [buttonSelectors];
@@ -71,18 +86,42 @@ class TesterImp {
             await frame.click(buttonSelector);
         }
     }
+    /**
+     * @param {string} text
+     * @returns {Promise<void>}
+     */
     async input(text) {
         await this.page.keyboard.type(text);
     }
+    /**
+     * @param {string} key
+     * @returns {Promise<void>}
+     */
     async keyPress(key) {
         await this.page.keyboard.press(key);
     }
+    /**
+     * @param {string} key
+     * @returns {Promise<void>}
+     */
     async keyDown(key) {
         await this.page.keyboard.down(key);
     }
+    /**
+     * @param {string} key
+     * @returns {Promise<void>}
+     */
     async keyUp(key) {
         await this.page.keyboard.up(key);
     }
+    /**
+     * @param {string} selector
+     * @param {number} x
+     * @param {number} y
+     * @param {string} [frameName="frameEditor"]
+     * @throws {Error}
+     * @returns {Promise<void>}
+     */
     async mouseClickInsideElement(selector, x, y, frameName = "frameEditor") {
         const offset = {
             x: x,
@@ -106,7 +145,12 @@ class TesterImp {
         }
         await elementHandle.click({ offset: offset });
     }
-
+    /**
+     * @param {string} extension
+     * @param {string} [txtEncoding="Unicode (UTF-8)"]
+     * @param {string} [frameName="frameEditor"]
+     * @returns {Promise<void>}
+     */
     async downloadFile(
         extension,
         txtEncoding = "Unicode (UTF-8)",
@@ -142,10 +186,12 @@ class TesterImp {
             await this.click([fileButton, extensionVal]);
         }
     }
-    /** @typedef {'from_file' | 'from_url' | 'from_storage'} InsertOption */
     /**
+     * @typedef {'from_file' | 'from_url' | 'from_storage'} InsertOption
      * @param {string} file
      * @param {InsertOption} insertOption
+     * @throws {Error}
+     * @returns {Promise<void>}
      */
     async insertPicture(file, insertOption = "From_File") {
         insertOption = insertOption.toLowerCase();
@@ -182,10 +228,15 @@ class TesterImp {
             throw new Error("Incorrect file insertion method");
         }
     }
+    /**
+     * @returns {Promise<void>}
+     */
     async waitAutosave() {
         await this.page.waitForTimeout(3000);
     }
-
+    /**
+     * @returns {Promise<void>}
+     */
     async close() {
         if (this.browser) {
             await this.browser.close();
