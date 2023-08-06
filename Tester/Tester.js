@@ -12,6 +12,20 @@ class TesterImp {
         this.page = null;
     }
     /**
+     * @param {string} frameName
+     * @returns {Promise<puppeteer.Frame | null>}
+     */
+    async findFrameByName(frameName) {
+        const frame = this.page
+            .frames()
+            .find((frame) => frame.name() === frameName);
+        if (frame) {
+            return frame;
+        } else {
+            throw new Error("Invalid frame name or frame does not exist");
+        }
+    }
+    /**
      * @returns {Promise<void>}
      */
     async launch() {
@@ -24,9 +38,7 @@ class TesterImp {
      */
     async waitEditor(frameName = "frameEditor") {
         const waitTime = 60000;
-        const frame = this.page
-            .frames()
-            .find((frame) => frame.name() === frameName);
+        const frame = await this.findFrameByName(frameName);
 
         const isLoadingEditor = await frame.waitForFunction(
             () => {
@@ -77,9 +89,7 @@ class TesterImp {
             throw new Error("Error");
         }
         console.log(buttonSelectors);
-        const frame = this.page
-            .frames()
-            .find((frame) => frame.name() === frameName);
+        const frame = await this.findFrameByName(frameName);
 
         for (const buttonSelector of buttonSelectors) {
             await frame.waitForSelector(buttonSelector);
@@ -128,9 +138,7 @@ class TesterImp {
             y: y,
         };
 
-        const frame = this.page
-            .frames()
-            .find((frame) => frame.name() === frameName);
+        const frame = await this.findFrameByName(frameName);
         const elementHandle = await frame.$(selector);
 
         if (!elementHandle) {
@@ -171,9 +179,7 @@ class TesterImp {
         } else if (extension === "txt") {
             // Node is either not clickable or not an HTMLElement
             await this.click([fileButton, extensionVal, okButtonSelector]);
-            const frame = this.page
-                .frames()
-                .find((frame) => frame.name() === frameName);
+            const frame = await this.findFrameByName(frameName);
             const elementExists = await frame.evaluate((selector) => {
                 const element = document.querySelector(selector);
                 return element !== null;
@@ -201,32 +207,42 @@ class TesterImp {
         const filePath = path.join(__dirname, "picture", `${file}`);
 
         await this.click([insertButton, imageButton]);
-        if (insertOption === "from_file") {
-            const fromFile = "#asc-gen237";
-            const [fileChooser] = await Promise.all([
-                this.page.waitForFileChooser(),
-                this.click(fromFile),
-            ]);
 
-            await fileChooser.accept([filePath]);
-        } else if (insertOption === "from_url") {
-            const fromUrlSelector = "#asc-gen239";
-            const inputFormSelector = "input.form-control";
-            const okButtonSelector = 'button[result="ok"]';
-            await this.click(fromUrlSelector);
-            const frame = this.page
-                .frames()
-                .find((frame) => frame.name() === frameName);
-            await frame.waitForSelector(inputFormSelector);
-            const input = await frame.$(inputFormSelector);
-            await input.type(`${file}`);
-            await this.click(okButtonSelector);
-        } else if (insertOption === "from_storage") {
-            const fromStorageSelector = "#asc-gen241";
-            await this.click(fromStorageSelector);
-        } else {
-            throw new Error("Incorrect file insertion method");
+        switch (insertOption) {
+            case "from_file":
+                const fromFile = "#asc-gen237";
+                const [fileChooser] = await Promise.all([
+                    this.page.waitForFileChooser(),
+                    this.click(fromFile),
+                ]);
+                await fileChooser.accept([filePath]);
+                break;
+
+            case "from_url":
+                const fromUrlSelector = "#asc-gen239";
+                const inputFormSelector = "input.form-control";
+                const okButtonSelector = 'button[result="ok"]';
+                await this.click(fromUrlSelector);
+                const frame = await this.findFrameByName(frameName);
+                await frame.waitForSelector(inputFormSelector);
+                const input = await frame.$(inputFormSelector);
+                await input.type(`${file}`);
+                await this.click(okButtonSelector);
+                break;
+
+            case "from_storage":
+                const fromStorageSelector = "#asc-gen241";
+                await this.click(fromStorageSelector);
+                break;
+
+            default:
+                throw new Error("Incorrect file insertion method");
         }
+    }
+
+    async drawFunction() {
+        const drawButton = 'li a[data-tab="draw"][data-title="Draw"]';
+        await this.click(drawButton);
     }
     /**
      * @returns {Promise<void>}
