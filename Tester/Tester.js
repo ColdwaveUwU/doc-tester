@@ -69,13 +69,58 @@ class TesterImp {
         }
     }
     /**
-     * @param {string} fileName
+     * @param {string|string[]} fileName
+     * @param {string} [toFile="file"]
+     * @throws {Error}
      * @returns {Promise<void>}
      */
-    async load(fileName) {
-        const url = `https://doc-linux.teamlab.info/example/editor?fileName=${fileName}`;
-        await this.page.goto(url);
+    async load(fileName, toFile = "file") {
+        const urlMain = "https://doc-linux.teamlab.info/example/";
+        await this.page.goto(urlMain);
+        //todo
+        if (fileName === "/") {
+            const directoryPath = path.join(__dirname, "..", "common", "file");
+            const files = fs.readdirSync(directoryPath);
+            const filteredFiles = files.filter(
+                (file) => path.extname(file) === ".docx"
+            );
+            fileName = filteredFiles;
+        } else if (typeof fileName === "string") {
+            fileName = [fileName];
+        } else if (!Array.isArray(fileName)) {
+            throw new Error("Error");
+        }
+
+        for (const file of fileName) {
+            await this.uploadFile(file, toFile, ".file-upload", "");
+            await this.click("#cancelEdit", "");
+        }
     }
+    /**
+     * @param {string} fileName
+     * @param {string} frameName
+     * @returns {Promise<void>}
+     */
+    async goToFile(fileName, frameName = "frameEditor") {
+        const okButtonSelector = '#window-view684 button[result="ok"]';
+        const waitTime = 5000;
+        const urlFile = `https://doc-linux.teamlab.info/example/editor?fileName=${fileName}`;
+
+        await this.page.goto(urlFile);
+        const frame = await this.findFrameByName(frameName);
+
+        try {
+            //todo
+            await frame.waitForSelector(okButtonSelector, {
+                timeout: waitTime,
+            }),
+                await this.click(okButtonSelector);
+            await this.waitEditor(frameName);
+        } catch (error) {
+            await this.waitEditor(frameName);
+        }
+    }
+
     /**
      * @param {string|string[]} buttonSelectors
      * @param {string} [frameName="frameEditor"]
@@ -89,11 +134,17 @@ class TesterImp {
             throw new Error("Error");
         }
         console.log(buttonSelectors);
-
-        for (const buttonSelector of buttonSelectors) {
-            const frame = await this.findFrameByName(frameName);
-            await frame.waitForSelector(buttonSelector);
-            await frame.click(buttonSelector);
+        if (frameName === "") {
+            for (const buttonSelector of buttonSelectors) {
+                await this.page.waitForSelector(buttonSelector);
+                await this.page.click(buttonSelector);
+            }
+        } else {
+            for (const buttonSelector of buttonSelectors) {
+                const frame = await this.findFrameByName(frameName);
+                await frame.waitForSelector(buttonSelector);
+                await frame.click(buttonSelector);
+            }
         }
     }
     /**
@@ -191,54 +242,54 @@ class TesterImp {
             await this.click([fileButton, extensionVal]);
         }
     }
+
     /**
-     * @typedef {'from_file' | 'from_url' | 'from_storage'} InsertOption
-     * @param {string} file
-     * @param {InsertOption} insertOption
+     * @param {string} fileName
+     * @param {string} toFile
+     * @param {string} selectorFileChooser
+     * @param {string} frameName
      * @throws {Error}
      * @returns {Promise<void>}
      */
-    async insertPicture(
-        file,
-        insertOption = "From_File",
+    async uploadFile(
+        fileName,
+        toFile,
+        selectorFileChooser,
         frameName = "frameEditor"
     ) {
-        insertOption = insertOption.toLowerCase();
-        const insertButton = 'li a[data-tab="ins"][data-title="Insert"]';
-        const imageButton = "#slot-btn-insimage";
-        const filePath = path.join(__dirname, "picture", `${file}`);
+        try {
+            const filePath = path.join(
+                __dirname,
+                "..",
+                "common",
+                toFile,
+                fileName
+            );
+            const [fileChooser] = await Promise.all([
+                this.page.waitForFileChooser(),
+                this.click([selectorFileChooser], frameName),
+            ]);
+            await fileChooser.accept([filePath]);
+        } catch (error) {
+            throw new Error(`Error uploading file: ${error.message}`);
+        }
+    }
 
-        await this.click([insertButton, imageButton]);
-
-        switch (insertOption) {
-            case "from_file":
-                const fromFile = "#asc-gen237";
-                const [fileChooser] = await Promise.all([
-                    this.page.waitForFileChooser(),
-                    this.click(fromFile),
-                ]);
-                await fileChooser.accept([filePath]);
-                break;
-
-            case "from_url":
-                const fromUrlSelector = "#asc-gen239";
-                const inputFormSelector = "input.form-control";
-                const okButtonSelector = 'button[result="ok"]';
-                await this.click(fromUrlSelector);
-                const frame = await this.findFrameByName(frameName);
-                await frame.waitForSelector(inputFormSelector);
-                const input = await frame.$(inputFormSelector);
-                await input.type(`${file}`);
-                await this.click(okButtonSelector);
-                break;
-
-            case "from_storage":
-                const fromStorageSelector = "#asc-gen241";
-                await this.click(fromStorageSelector);
-                break;
-
-            default:
-                throw new Error("Incorrect file insertion method");
+    /**
+     * @param {string} inputText
+     * @param {string} inputFormSelector
+     * @param {string} frameName
+     * @throws {Error}
+     * @returns {Promise<void>}
+     */
+    async inputToForm(inputText, inputFormSelector, frameName = "frameEditor") {
+        try {
+            const frame = await this.findFrameByName(frameName);
+            await frame.waitForSelector(inputFormSelector);
+            const input = await frame.$(inputFormSelector);
+            await input.type(`${inputText}`);
+        } catch (error) {
+            throw new Error(`Error inputting text to form: ${error.message}`);
         }
     }
     /**
@@ -250,23 +301,28 @@ class TesterImp {
         const elementSelector = "#id_main_view";
         const frame = await this.findFrameByName("frameEditor");
         const elementHandle = await frame.$(elementSelector);
-    
+
         if (!elementHandle) {
             throw new Error(
                 `Element with selector "${elementSelector}" not found.`
             );
         }
-    
+
         await elementHandle.hover();
-    
+
         console.log("Dragging to:", endX, endY);
-    
-        await elementHandle.mouse.down({ button: "left"});
+
+        await elementHandle.mouse.down({ button: "left" });
         await this.page.mouse.move(endX, endY);
         await this.page.mouse.up({ button: "left" });
     }
-    
-
+    /**
+     * @param {string} drawOption
+     * @param {string} color
+     * @param {Number} size
+     * @throws {Error}
+     * @returns {Promise<void>}
+     */
     async drawFunction(drawOption, color, size = 1) {
         const drawButton = 'li a[data-tab="draw"][data-title="Draw"]';
         const penOne = [
