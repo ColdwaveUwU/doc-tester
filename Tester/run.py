@@ -61,6 +61,10 @@ with open(config_path, "r") as config_file:
     config_content = config_file.read()
 
 config = json.loads(config_content)
+if not is_dir("./work_directory"):
+    create_dir("./work_directory")
+    create_dir("./work_directory/cache")
+
 for test in tests_array:
     print("run test: " + test)
     run_file = test + ".runned.js"

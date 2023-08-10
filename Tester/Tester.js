@@ -3,10 +3,12 @@ const fs = require("fs");
 const path = require("path");
 class TesterImp {
     constructor(config) {
+        this.cacheDir = path.resolve("./work_directory/cache");
         this.browserOptions = {
             headless: false,
             slowMo: config.config.pressSlow,
             executablePath: config.config.executablePath,
+            args: ["--disk-cache-dir=" + this.cacheDir],
         };
         this.browser = config.browser;
         this.page = null;
@@ -70,27 +72,32 @@ class TesterImp {
     }
     /**
      * @param {string|string[]} fileName
+     * @param {string} extension
      * @param {string} [toFile="file"]
      * @throws {Error}
      * @returns {Promise<void>}
      */
-    async load(fileName, toFile = "file") {
+    async uploadTestFile(fileName, extension, toFile = "file") {
         const urlMain = "https://doc-linux.teamlab.info/example/";
         await this.page.goto(urlMain);
-        //todo
+
         if (fileName === "/") {
             const directoryPath = path.join(__dirname, "..", "common", "file");
             const files = fs.readdirSync(directoryPath);
-            const filteredFiles = files.filter(
-                (file) => path.extname(file) === ".docx"
-            );
-            fileName = filteredFiles;
-        } else if (typeof fileName === "string") {
+
+            if (extension) {
+                const filteredFiles = files.filter(
+                    (file) => path.extname(file) === `.${extension}`
+                );
+                fileName = filteredFiles;
+            } else {
+                fileName = files;
+            }
+        } else if (typeof fileName === "string" && fileName !== "/") {
             fileName = [fileName];
         } else if (!Array.isArray(fileName)) {
-            throw new Error("Error");
+            throw new Error("Invalid input for fileName");
         }
-
         for (const file of fileName) {
             await this.uploadFile(file, toFile, ".file-upload", "");
             await this.click("#cancelEdit", "");
@@ -102,22 +109,40 @@ class TesterImp {
      * @returns {Promise<void>}
      */
     async goToFile(fileName, frameName = "frameEditor") {
-        const okButtonSelector = '#window-view684 button[result="ok"]';
-        const waitTime = 5000;
         const urlFile = `https://doc-linux.teamlab.info/example/editor?fileName=${fileName}`;
-
         await this.page.goto(urlFile);
-        const frame = await this.findFrameByName(frameName);
-
+    }
+    /**
+     *
+     * @param {string} encoding
+     * @param {string} [frameName="frameEditor"]
+     * @throws {Error}
+     * @returns {Promise<void>}
+     */
+    async selectFileEncoding(encoding, frameName = "frameEditor") {
+        const encodingDropdown =
+            '#id-codepages-combo button[data-toggle="dropdown"]';
+        const okButton = 'button[result="ok"]';
         try {
-            //todo
-            await frame.waitForSelector(okButtonSelector, {
-                timeout: waitTime,
-            }),
-                await this.click(okButtonSelector);
-            await this.waitEditor(frameName);
+            await this.page.waitForTimeout(5000);
+            await this.click(encodingDropdown);
+            const frame = await this.findFrameByName(frameName);
+            const encodingElements = await frame.$$(
+                "ul.dropdown-menu.scrollable-menu li div"
+            );
+            console.log(`Encoding Search: ${encoding}`);
+            for (const encodingElement of encodingElements) {
+                const text = await encodingElement.evaluate(
+                    (el) => el.textContent
+                );
+                if (text.includes(encoding)) {
+                    await encodingElement.click();
+                    break;
+                }
+            }
+            await this.click(okButton);
         } catch (error) {
-            await this.waitEditor(frameName);
+            console.error("File Encoding not found");
         }
     }
 
@@ -218,7 +243,6 @@ class TesterImp {
         const extensionVal = `.svg-format-${extension}`;
         const dialogSelector = ".asc-window.modal.alert.notransform";
         const okButtonSelector = `${dialogSelector} button[result="ok"]`;
-        const elementSelector = "button.btn.btn-default.dropdown-toggle";
         if (extension === "rtf") {
             await this.click([
                 fileButton,
@@ -229,15 +253,7 @@ class TesterImp {
         } else if (extension === "txt") {
             // Node is either not clickable or not an HTMLElement
             await this.click([fileButton, extensionVal, okButtonSelector]);
-            const frame = await this.findFrameByName(frameName);
-            const elementExists = await frame.evaluate((selector) => {
-                const element = document.querySelector(selector);
-                return element !== null;
-            }, elementSelector);
-            console.log(elementExists); //true
-            if (elementExists) {
-                await this.click(".dropdown-toggle");
-            }
+            await this.selectFileEncoding(txtEncoding);
         } else {
             await this.click([fileButton, extensionVal]);
         }
@@ -287,35 +303,71 @@ class TesterImp {
             const frame = await this.findFrameByName(frameName);
             await frame.waitForSelector(inputFormSelector);
             const input = await frame.$(inputFormSelector);
-            await input.type(`${inputText}`);
+            await input.type(inputText);
         } catch (error) {
             throw new Error(`Error inputting text to form: ${error.message}`);
         }
     }
     /**
+     * @param {number} startX
+     * @param {number} startY
      * @param {number} endX
      * @param {number} endY
+     * @param {string} [frameName="frameEditor"]
      * @returns {Promise<void>}
      */
-    async mouseDrawingLine(endX, endY) {
-        const elementSelector = "#id_main_view";
-        const frame = await this.findFrameByName("frameEditor");
-        const elementHandle = await frame.$(elementSelector);
+    async mouseDrawingLine(
+        startX,
+        startY,
+        endX,
+        endY,
+        frameName = "frameEditor"
+    ) {
+        const frame = await this.findFrameByName(frameName);
 
-        if (!elementHandle) {
-            throw new Error(
-                `Element with selector "${elementSelector}" not found.`
-            );
+        const canvasSelector = "#id_main_view > #id_viewer";
+        const canvas = await frame.$(canvasSelector);
+
+        if (!canvas) {
+            throw new Error("Canvas element not found.");
         }
 
-        await elementHandle.hover();
+        const canvasBoundingBox = await canvas.boundingBox();
 
-        console.log("Dragging to:", endX, endY);
+        if (!canvasBoundingBox) {
+            throw new Error("Canvas element not visible.");
+        }
 
-        await elementHandle.mouse.down({ button: "left" });
-        await this.page.mouse.move(endX, endY);
-        await this.page.mouse.up({ button: "left" });
+        const deltaX = endX - startX;
+        const deltaY = endY - startY;
+
+        const page = frame.page();
+
+        const mouseDownX =
+            canvasBoundingBox.x + startX + canvasBoundingBox.width / 2;
+        const mouseDownY =
+            canvasBoundingBox.y + startY + canvasBoundingBox.height / 2;
+        await page.mouse.move(mouseDownX, mouseDownY);
+        await page.mouse.down();
+
+        const mouseX =
+            canvasBoundingBox.x + startX + deltaX + canvasBoundingBox.width / 2;
+        const mouseY =
+            canvasBoundingBox.y +
+            startY +
+            deltaY +
+            canvasBoundingBox.height / 2;
+
+        await page.mouse.move(mouseX, mouseY);
+
+        const mouseUpX =
+            canvasBoundingBox.x + endX + canvasBoundingBox.width / 2;
+        const mouseUpY =
+            canvasBoundingBox.y + endY + canvasBoundingBox.height / 2;
+        await page.mouse.move(mouseUpX, mouseUpY);
+        await page.mouse.up();
     }
+
     /**
      * @param {string} drawOption
      * @param {string} color
@@ -324,22 +376,58 @@ class TesterImp {
      * @returns {Promise<void>}
      */
     async drawFunction(drawOption, color, size = 1) {
-        const drawButton = 'li a[data-tab="draw"][data-title="Draw"]';
-        const penOne = [
-            "#asc-gen592 > button",
-            "#asc-gen592 > button.dropdown-toggle",
-            `#asc-gen592 div > a[color-name="${color}"]`,
-        ];
-        await this.click([drawButton]);
-        if (drawOption === "pen_1") {
-            await this.click(penOne);
-            await this.mouseDrawingLine(40, 50);
-        } else if (drawOption === "pen_2") {
-        } else if (drawOption === "highlighter") {
-        } else {
-            throw new Error("Invalid draw option");
+        const drawButtonSelector = 'li a[data-tab="draw"][data-title="Draw"]';
+        const drawMethods = {
+            pen_1: "#asc-gen592",
+            pen_2: "#asc-gen594",
+            highlighter: "#asc-gen596",
+        };
+        const drawMethodsButton = "button";
+        const dropdownColorPanel = "button.dropdown-toggle";
+        const drawMethodsColor = `div > a[color-name="${color}"]`;
+
+        let selectedOption = null;
+
+        switch (drawOption) {
+            case "pen_1":
+                selectedOption = [
+                    `${drawMethods.pen_1} > ${drawMethodsButton}`,
+                    `${drawMethods.pen_1}  > ${dropdownColorPanel}`,
+                    `${drawMethods.pen_1}  ${drawMethodsColor}`,
+                ];
+                break;
+
+            case "pen_2":
+                selectedOption = [
+                    `${drawMethods.pen_2} > ${drawMethodsButton}`,
+                    `${drawMethods.pen_2}  > ${dropdownColorPanel}`,
+                    `${drawMethods.pen_2}  ${drawMethodsColor}`,
+                ];
+                break;
+
+            case "highlighter":
+                selectedOption = [
+                    `${drawMethods.highlighter} > ${drawMethodsButton}`,
+                    `${drawMethods.highlighter}  > ${dropdownColorPanel}`,
+                    `${drawMethods.highlighter}  ${drawMethodsColor}`,
+                ];
+                break;
+
+            default:
+                throw new Error("Invalid draw option");
         }
+
+        const [penSelector, dropdownToggleSelector, colorSelector] =
+            selectedOption;
+
+        await this.click([
+            drawButtonSelector,
+            penSelector,
+            dropdownToggleSelector,
+            colorSelector,
+        ]);
     }
+
     /**
      * @returns {Promise<void>}
      */
