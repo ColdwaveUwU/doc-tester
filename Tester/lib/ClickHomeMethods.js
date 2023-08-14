@@ -70,6 +70,28 @@ class ClickHomeMethods {
         await this.tester.selectDrowdown("#id-toolbar-btn-fontcolor");
         await this.tester.selectColor("#id-toolbar-btn-fontcolor", color);
     }
+
+    async clickBullets(bullet) {
+        const bulletLibrary = {
+            none: "#id-markers-asc-gen3785",
+            filledroundbullets: "#id-markers-asc-gen3786",
+            hollowroundbullets: "#id-markers-asc-gen3787",
+            filledsquarebullets: "#id-markers-asc-gen3788",
+            starbullets: "#id-markers-asc-gen3789",
+            arrowbullets: "#id-markers-asc-gen3790",
+            checkmarkbullets: "#id-markers-asc-gen3791",
+            filledrhombusbullets: "#id-markers-asc-gen3792",
+            dashbullets: "#id-markers-asc-gen3793",
+        };
+        await this.tester.selectDrowdown("#id-toolbar-btn-markers");
+        const selectedBulletSelector = bulletLibrary[bullet];
+        if (selectedBulletSelector) {
+            //search selector?? todo
+            await this.tester.click(selectedBulletSelector);
+        } else {
+            console.error(`Unknown bullet type: ${bullet}`);
+        }
+    }
 }
 
 module.exports = ClickHomeMethods;
