@@ -158,7 +158,6 @@ class TesterImp {
         } else if (!Array.isArray(buttonSelectors)) {
             throw new Error("Error");
         }
-        console.log(buttonSelectors);
         if (frameName === "") {
             for (const buttonSelector of buttonSelectors) {
                 await this.page.waitForSelector(buttonSelector);
@@ -434,6 +433,54 @@ class TesterImp {
     async waitAutosave() {
         await this.page.waitForTimeout(3000);
     }
+
+    async selectDrowdown(selector) {
+        const setDropdown = `${selector} > .dropdown-toggle`;
+        await this.click(setDropdown);
+    }
+
+    async selectColor(selector, color) {
+        const setOption = `${selector} a[color-name="${color}"]`;
+        await this.click(setOption);
+    }
+
+    async selectByText(text, frameName = "frameEditor") {
+        const frame = await this.findFrameByName(frameName);
+
+        const linkElement = await frame.evaluateHandle((linkText) => {
+            const links = Array.from(
+                document.querySelectorAll(
+                    "#id-toolbar-btn-caseul > ul.dropdown-menu a"
+                )
+            );
+            return links.find((link) => link.textContent === linkText);
+        }, text);
+
+        await this.click(linkElement);
+    }
+    async selectByText(text, selector, frameName = "frameEditor") {
+        const frame = await this.findFrameByName(frameName);
+
+        const linkElement = await frame.evaluateHandle(
+            (linkText, sel) => {
+                const links = Array.from(
+                    document.querySelectorAll(`${sel} ul.dropdown-menu a`)
+                );
+                return links.find(
+                    (link) => link.textContent.trim() === linkText
+                );
+            },
+            text,
+            selector
+        );
+
+        if (linkElement) {
+            await linkElement.click();
+        } else {
+            console.error(`Element with text "${text}" not found.`);
+        }
+    }
+
     /**
      * @returns {Promise<void>}
      */

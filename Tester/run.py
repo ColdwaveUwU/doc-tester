@@ -71,6 +71,8 @@ for test in tests_array:
     copy_file("./Tester.js", run_file)
     test_content = read_file(test)
     test_content = test_content.replace("Tester.", "await Tester.")
+    test_content = test_content.replace("clickHomeMethods.", "await clickHomeMethods.")
+    test_content = test_content.replace("import ClickHomeMethods ", "const ClickHomeMethods = require('../lib/ClickHomeMethods')\nconst clickHomeMethods = new ClickHomeMethods(Tester);")
     replace_in_file(run_file, "%%CONFIG%%", str(config_path))
     replace_in_file(run_file, "\"%%CODE%%\"", test_content)
     run_cmd("node", [run_file])
