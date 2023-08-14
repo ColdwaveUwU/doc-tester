@@ -4,21 +4,8 @@ class ClickHomeMethods {
         this.initialize();
     }
 
-    async initialize(frameName = "frameEditor") {
-        const frame = await this.tester.findFrameByName(frameName);
-        try {
-            await this.tester.waitForFunction(
-                () => {
-                    frame.waitForSelector(".ribtab.canedit.active");
-                    return frame;
-                },
-                { timeout: 5000 }
-            );
-
-            console.log("ClickHomeMethods started");
-        } catch (error) {
-            await this.tester.click('li a[data-title="Home"]');
-        }
+    async initialize() {
+        await this.tester.click('li a[data-title="Home"]');
     }
 
     async clickBold() {
