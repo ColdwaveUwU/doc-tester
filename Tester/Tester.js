@@ -504,6 +504,7 @@ fs.readFile(filePath, "utf8", async (err, data) => {
         const config = JSON.parse(data);
         console.log("Contents of the JSON file:", config);
         const Tester = new TesterImp(config);
+        globalThis.Tester = Tester;
         "%%CODE%%"
     } catch (error) {
         console.error("Error when parsing JSON:", error);
