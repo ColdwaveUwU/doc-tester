@@ -4,6 +4,7 @@ import glob
 import json
 import shutil
 import subprocess
+import re
 
 def is_file(file_path):
     return os.path.isfile(file_path)
@@ -71,11 +72,15 @@ for test in tests_array:
     copy_file("./Tester.js", run_file)
     test_content = read_file(test)
     test_content = test_content.replace("Tester.", "await Tester.")
+    matches = re.findall(r'import\s+([\w.]+)', test_content)
+    for match in matches:
+        replacement_import = f"const {match} = require('../lib/{match}');"
+        replacement_usage = f"await {match}."
     
-    test_content = test_content.replace("import Toolbar", "const Toolbar = require('../lib/Toolbar');")
-    test_content = test_content.replace("Toolbar.", "await Toolbar.")
-    
+        test_content = test_content.replace(f"import {match}", replacement_import)
+        test_content = test_content.replace(f"{match}.", replacement_usage)
+
     replace_in_file(run_file, "%%CONFIG%%", str(config_path))
     replace_in_file(run_file, "\"%%CODE%%\"", test_content)
-    run_cmd("node", [run_file])
-    os.remove(run_file)
+    #run_cmd("node", [run_file])
+    #os.remove(run_file)

@@ -1,6 +1,6 @@
 import Toolbar
-
 Tester.launch();
+
 //Tester.uploadTestFile('/', 'docx');
 Tester.goToFile('new.docx');
 //Tester.selectFileEncoding("Vietnamese (Windows)");
