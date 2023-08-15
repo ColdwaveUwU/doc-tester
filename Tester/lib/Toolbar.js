@@ -1,77 +1,89 @@
-class ClickHomeMethods {
-    constructor(tester) {
-        this.tester = tester;
-        this.initialize();
-    }
+module.exports = {
+    tester : globalThis.Tester,
 
-    async initialize() {
+    clickHome : async function() {
         await this.tester.click('li a[data-title="Home"]');
-    }
+    },
 
-    async clickBold() {
+    clickBold : async function() {
+        await this.clickHome();
         await this.tester.click("#id-toolbar-btn-bold");
-    }
+    },
 
-    async clickItalic() {
+    clickItalic : async function() {
+        await this.clickHome();
         await this.tester.click("#id-toolbar-btn-italic");
-    }
+    },
 
-    async clickUnderline() {
+    clickUnderline : async function() {
+        await this.clickHome();
         await this.tester.click("#id-toolbar-btn-underline");
-    }
+    },
 
-    async clickStrikeout() {
+    clickStrikeout : async function() {
+        await this.clickHome();
         await this.tester.click("#id-toolbar-btn-strikeout");
-    }
+    },
 
-    async clickSuperscript() {
+    clickSuperscript : async function() {
+        await this.clickHome();
         await this.tester.click("#id-toolbar-btn-superscript");
-    }
+    },
 
-    async clickSubscript() {
+    clickSubscript : async function() {
+        await clickHome();
         await this.tester.click("#id-toolbar-btn-subscript");
-    }
+    },
 
-    async clickIncFont() {
+    clickIncFont : async function() {
+        await this.clickHome();
         await this.tester.click("#id-toolbar-btn-incfont");
-    }
+    },
 
-    async clickDecFont() {
+    clickDecFont : async function() {
+        await this.clickHome();
         await this.tester.click("#id-toolbar-btn-decfont");
-    }
+    },
 
-    async clickFormControl() {
+    clickFormControl : async function() {
+        await this.clickHome();
         await this.tester.click("#asc-gen439");
-    }
+    },
 
-    async setFontSize(size) {
+    setFontSize : async function(size) {
+        await this.clickHome();
         await this.tester.click("#asc-gen437");
         await this.tester.input(size);
-    }
+    },
 
-    async selectFontSize(size) {
+    selectFontSize : async function(size) {
+        await this.clickHome();
         await this.tester.click("#asc-gen437 > button");
         await this.tester.selectByText(size, "#asc-gen437");
-    }
+    },
 
-    async clickHightlight(color) {
+    clickHightlight : async function(color) {
+        await this.clickHome();
         await this.tester.click("#id-toolbar-btn-highlight > .btn.btn-toolbar");
         await this.tester.selectDrowdown("#id-toolbar-btn-highlight");
         await this.tester.selectColor("#id-toolbar-btn-highlight", color);
-    }
+    },
 
-    async clickChangeCase(textCase) {
+    clickChangeCase : async function(textCase) {
+        await this.clickHome();
         await this.tester.click("#id-toolbar-btn-case");
         await this.tester.selectByText(textCase, "#id-toolbar-btn-case");
-    }
+    },
 
-    async clickFontColor(color) {
+    clickFontColor : async function(color) {
+        await this.clickHome();
         await this.tester.click("#id-toolbar-btn-fontcolor > .btn.btn-toolbar");
         await this.tester.selectDrowdown("#id-toolbar-btn-fontcolor");
         await this.tester.selectColor("#id-toolbar-btn-fontcolor", color);
-    }
+    },
 
-    async clickBullets(bullet) {
+    clickBullets : async function(bullet) {
+        await this.clickHome();
         const bulletLibrary = {
             none: "#id-markers-asc-gen3785",
             filledroundbullets: "#id-markers-asc-gen3786",
@@ -92,6 +104,4 @@ class ClickHomeMethods {
             console.error(`Unknown bullet type: ${bullet}`);
         }
     }
-}
-
-module.exports = ClickHomeMethods;
+};
