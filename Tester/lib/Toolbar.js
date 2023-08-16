@@ -84,8 +84,8 @@ module.exports = {
     clickBullets : async function(bullet) {
         await this.clickHome();
         const bulletLibrary = {
-            none: "#id-markers-asc-gen3785",
-            filledroundbullets: "#id-markers-asc-gen3786",
+            none: "#id-markers-asc-gen3777",
+            filledroundbullets: "#id-markers-asc-gen3778",
             hollowroundbullets: "#id-markers-asc-gen3787",
             filledsquarebullets: "#id-markers-asc-gen3788",
             starbullets: "#id-markers-asc-gen3789",
@@ -98,7 +98,7 @@ module.exports = {
         const selectedBulletSelector = bulletLibrary[bullet];
         if (selectedBulletSelector) {
             //search selector?? todo
-            await Tester.click(selectedBulletSelector);
+            await Tester.click("#id-markers-asc-gen3778");
         } else {
             console.error(`Unknown bullet type: ${bullet}`);
         }

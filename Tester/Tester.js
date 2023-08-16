@@ -108,9 +108,16 @@ class TesterImp {
      * @param {string} frameName
      * @returns {Promise<void>}
      */
-    async goToFile(fileName, frameName = "frameEditor") {
+    async openFile(fileName) {
         const urlFile = `https://doc-linux.teamlab.info/example/editor?fileName=${fileName}`;
         await this.page.goto(urlFile);
+        await this.waitEditor();
+    }
+
+    async createFile(extension) { 
+        const urlFile = `https://doc-linux.teamlab.info/example/editor?fileExt=${extension}`;
+        await this.page.goto(urlFile);
+        await this.waitEditor()
     }
     /**
      *
@@ -236,11 +243,10 @@ class TesterImp {
     async downloadFile(
         extension,
         txtEncoding = "Unicode (UTF-8)",
-        frameName = "frameEditor"
     ) {
         const fileButton = 'li[data-layout-name="toolbar-file"]';
         const extensionVal = `.svg-format-${extension}`;
-        const dialogSelector = ".asc-window.modal.alert.notransform";
+        const dialogSelector = ".asc-window.modal.alert";
         const okButtonSelector = `${dialogSelector} button[result="ok"]`;
         if (extension === "rtf") {
             await this.click([
@@ -250,7 +256,6 @@ class TesterImp {
                 okButtonSelector,
             ]);
         } else if (extension === "txt") {
-            // Node is either not clickable or not an HTMLElement
             await this.click([fileButton, extensionVal, okButtonSelector]);
             await this.selectFileEncoding(txtEncoding);
         } else {

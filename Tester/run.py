@@ -33,7 +33,6 @@ def run_cmd(command, args):
     full_command = [command] + args
     subprocess.run(full_command)
 
-
 def get_tests_in_dir(directory):
     files = []
     for file in glob.glob(os.path.join(directory, "*.js")):
@@ -42,6 +41,17 @@ def get_tests_in_dir(directory):
         elif is_dir(file):
             files += get_tests_in_dir(file)
     return files
+
+def parse_import_line(line):
+    parts = line.split()
+    lib_path = parts[0]
+    if "as" in parts:
+        index = parts.index("as")
+        module_name = parts[index + 1]
+        lib_path = lib_path.replace('.', '/')
+    else:
+        module_name = lib_path
+    return lib_path, module_name
 
 params = sys.argv[1:]
 if len(params) == 0:
@@ -71,15 +81,29 @@ for test in tests_array:
     run_file = test + ".runned.js"
     copy_file("./Tester.js", run_file)
     test_content = read_file(test)
+    tester_launch = 'Tester.launch();\n'
+    test_content = tester_launch + test_content
     test_content = test_content.replace("Tester.", "await Tester.")
-    matches = re.findall(r'import\s+([\w.]+)', test_content)
-    for match in matches:
-        replacement_import = f"const {match} = require('../lib/{match}');"
-        replacement_usage = f"await {match}."
     
+    matches = re.findall(r'import\s+(.*)', test_content)
+    for match in matches:
+        lib_path, module_name = parse_import_line(match)
+        if 'as' in match:
+            replacement_import = f"const {module_name} = require('../lib/{lib_path}');"
+            replacement_usage = f"await {module_name}."
+        else:
+            if '.' in module_name:
+                lib_path = lib_path.replace('.', '/')
+                module_parts = module_name.split('.')
+                module_prefix = module_parts[0]
+                creat_obj = f"const {module_prefix} = {{}};"
+                replacement_import = f"{creat_obj}\n{module_name} = require('../lib/{lib_path}');"
+                replacement_usage = f"await {module_name}."
+            else:
+                replacement_import = f"const {module_name} = require('../lib/{lib_path}');"
+                replacement_usage = f"await {module_name}."
         test_content = test_content.replace(f"import {match}", replacement_import)
-        test_content = test_content.replace(f"{match}.", replacement_usage)
-
+        test_content = test_content.replace(f"{module_name}.", replacement_usage)
     replace_in_file(run_file, "%%CONFIG%%", str(config_path))
     replace_in_file(run_file, "\"%%CODE%%\"", test_content)
     #run_cmd("node", [run_file])
