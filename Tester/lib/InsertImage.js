@@ -1,23 +1,23 @@
 module.exports = {
-    filePath: 'image',
+    filePath: "image",
 
-    clickInsertImage: async function() {
-        await Tester.click(['a[data-title="Insert"]', '#tlbtn-insertimage'])
+    clickInsertImage: async function () {
+        await Tester.click(['a[data-title="Insert"]', "#tlbtn-insertimage"]);
     },
-    fromFile: async function(fileName) {
+    fromFile: async function (fileName) {
         await this.clickInsertImage();
-        await Tester.uploadFile(fileName, this.filePath, '#asc-gen237');
+        await Tester.uploadFile(fileName, this.filePath, "#asc-gen237");
     },
 
-    fromUrl: async function(url) {
+    fromUrl: async function (url) {
         await this.clickInsertImage();
-        await Tester.click('#asc-gen239');
-        await Tester.inputToForm(url, '#id-dlg-url');
+        await Tester.click("#asc-gen239");
+        await Tester.inputToForm(url, "#id-dlg-url");
         await Tester.click('button[result="ok"]');
     },
 
-    fromStorage: async function() {
+    fromStorage: async function () {
         await this.clickInsertImage();
-        await Tester.click('#asc-gen241');
-    }
-}
+        await Tester.click("#asc-gen241");
+    },
+};

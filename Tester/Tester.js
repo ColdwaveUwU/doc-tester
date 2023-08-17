@@ -1,7 +1,14 @@
 const puppeteer = require("puppeteer");
 const fs = require("fs");
 const path = require("path");
+/**
+ * @class
+ */
 class TesterImp {
+    /**
+     * @constructor
+     * @param {object} config
+     */
     constructor(config) {
         this.cacheDir = path.resolve("./work_directory/cache");
         this.browserOptions = {
@@ -113,11 +120,14 @@ class TesterImp {
         await this.page.goto(urlFile);
         await this.waitEditor();
     }
-
-    async createFile(extension) { 
+    /**
+     * @param {string} extension
+     * @returns {Promise<void>}
+     */
+    async createFile(extension) {
         const urlFile = `https://doc-linux.teamlab.info/example/editor?fileExt=${extension}`;
         await this.page.goto(urlFile);
-        await this.waitEditor()
+        await this.waitEditor();
     }
     /**
      *
@@ -240,10 +250,7 @@ class TesterImp {
      * @param {string} [frameName="frameEditor"]
      * @returns {Promise<void>}
      */
-    async downloadFile(
-        extension,
-        txtEncoding = "Unicode (UTF-8)",
-    ) {
+    async downloadFile(extension, txtEncoding = "Unicode (UTF-8)") {
         const fileButton = 'li[data-layout-name="toolbar-file"]';
         const extensionVal = `.svg-format-${extension}`;
         const dialogSelector = ".asc-window.modal.alert";
@@ -321,6 +328,7 @@ class TesterImp {
      * @returns {Promise<void>}
      */
     async mouseDrawingLine(
+        selector,
         startX,
         startY,
         endX,
@@ -328,8 +336,7 @@ class TesterImp {
         frameName = "frameEditor"
     ) {
         const frame = await this.findFrameByName(frameName);
-
-        const canvasSelector = "#id_main_view > #id_viewer";
+        const canvasSelector = selector;
         const canvas = await frame.$(canvasSelector);
 
         if (!canvas) {
@@ -439,30 +446,29 @@ class TesterImp {
         await this.page.waitForTimeout(3000);
     }
 
+    /**
+     * @param {string} selector
+     * @returns {Promise<void>}
+     */
     async selectDrowdown(selector) {
         const setDropdown = `${selector} > .dropdown-toggle`;
         await this.click(setDropdown);
     }
-
+    /**
+     * @param {string} selector
+     * @param {string} color
+     * @returns {Promise<void>}
+     */
     async selectColor(selector, color) {
         const setOption = `${selector} a[color-name="${color}"]`;
         await this.click(setOption);
     }
-
-    async selectByText(text, frameName = "frameEditor") {
-        const frame = await this.findFrameByName(frameName);
-
-        const linkElement = await frame.evaluateHandle((linkText) => {
-            const links = Array.from(
-                document.querySelectorAll(
-                    "#id-toolbar-btn-caseul > ul.dropdown-menu a"
-                )
-            );
-            return links.find((link) => link.textContent === linkText);
-        }, text);
-
-        await this.click(linkElement);
-    }
+    /**
+     * @param {string} txt
+     * @param {string} selector
+     * @param {string} frameName
+     * @returns {Promise<void>}
+     */
     async selectByText(text, selector, frameName = "frameEditor") {
         const frame = await this.findFrameByName(frameName);
 
