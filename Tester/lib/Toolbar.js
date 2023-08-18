@@ -43,21 +43,16 @@ module.exports = {
         await Tester.click("#id-toolbar-btn-decfont");
     },
 
-    clickFormControl: async function () {
-        await this.clickHome();
-        await Tester.click("#asc-gen439");
-    },
-
     setFontSize: async function (size) {
         await this.clickHome();
-        await Tester.click("#asc-gen437");
+        await Tester.click("#slot-field-fontsize");
         await Tester.input(size);
     },
 
     selectFontSize: async function (size) {
         await this.clickHome();
-        await Tester.click("#asc-gen437 > button");
-        await Tester.selectByText(size, "#asc-gen437");
+        await Tester.selectDrowdown("#slot-field-fontsize");
+        await Tester.selectByText(size, "#slot-field-fontsize");
     },
 
     clickHightlight: async function (color) {
@@ -169,8 +164,8 @@ module.exports = {
 
     selectFont: async function (font) {
         await this.clickHome();
-        await Tester.click("#asc-gen439");
-        await Tester.inputToForm(font, "#asc-gen439 > .form-control");
+        await Tester.click("#slot-field-fontname");
+        await Tester.inputToForm(font, "#slot-field-fontname .form-control");
         await Tester.keyPress("Enter");
     },
 
@@ -190,15 +185,23 @@ module.exports = {
 
         switch (select) {
             case "nonprint":
-                await Tester.click("#asc-gen212");
+                await Tester.click(
+                    "#id-toolbar-btn-hidenchars li:nth-child(1)"
+                );
                 break;
             case "hidden":
-                await Tester.click("#asc-gen214");
+                await Tester.click(
+                    "#id-toolbar-btn-hidenchars li:nth-child(2)"
+                );
                 break;
             case "all":
-                await Tester.click("#asc-gen212");
+                await Tester.click(
+                    "#id-toolbar-btn-hidenchars li:nth-child(1)"
+                );
                 await Tester.selectDrowdown("#id-toolbar-btn-hidenchars");
-                await Tester.click("#asc-gen214");
+                await Tester.click(
+                    "#id-toolbar-btn-hidenchars li:nth-child(2)"
+                );
                 break;
             default:
                 console.log("Input select");
@@ -209,7 +212,7 @@ module.exports = {
     selectShading: async function (color) {
         await this.clickHome();
         await Tester.selectDrowdown("#id-toolbar-btn-paracolor");
-        await Tester.selectColor("#asc-gen578-color-menu", color);
+        await Tester.selectColor("#id-toolbar-btn-paracolor", color);
     },
 
     clickClearStyle: async function () {

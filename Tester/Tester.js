@@ -389,11 +389,11 @@ class TesterImp {
     async drawFunction(drawOption, color, size = 1) {
         const drawButtonSelector = 'li a[data-tab="draw"][data-title="Draw"]';
         const drawMethods = {
-            pen_1: "#asc-gen592",
-            pen_2: "#asc-gen594",
-            highlighter: "#asc-gen596",
+            pen_1: "#slot-btn-draw-pen-0",
+            pen_2: "#slot-btn-draw-pen-1",
+            highlighter: "#slot-btn-draw-pen-2",
         };
-        const drawMethodsButton = "button";
+        const drawMethodsButton = ".inner-box-icon";
         const dropdownColorPanel = "button.dropdown-toggle";
         const drawMethodsColor = `div > a[color-name="${color}"]`;
 
@@ -402,24 +402,24 @@ class TesterImp {
         switch (drawOption) {
             case "pen_1":
                 selectedOption = [
-                    `${drawMethods.pen_1} > ${drawMethodsButton}`,
-                    `${drawMethods.pen_1}  > ${dropdownColorPanel}`,
+                    `${drawMethods.pen_1} ${drawMethodsButton}`,
+                    `${drawMethods.pen_1} ${dropdownColorPanel}`,
                     `${drawMethods.pen_1}  ${drawMethodsColor}`,
                 ];
                 break;
 
             case "pen_2":
                 selectedOption = [
-                    `${drawMethods.pen_2} > ${drawMethodsButton}`,
-                    `${drawMethods.pen_2}  > ${dropdownColorPanel}`,
+                    `${drawMethods.pen_2} ${drawMethodsButton}`,
+                    `${drawMethods.pen_2} ${dropdownColorPanel}`,
                     `${drawMethods.pen_2}  ${drawMethodsColor}`,
                 ];
                 break;
 
             case "highlighter":
                 selectedOption = [
-                    `${drawMethods.highlighter} > ${drawMethodsButton}`,
-                    `${drawMethods.highlighter}  > ${dropdownColorPanel}`,
+                    `${drawMethods.highlighter} ${drawMethodsButton}`,
+                    `${drawMethods.highlighter} ${dropdownColorPanel}`,
                     `${drawMethods.highlighter}  ${drawMethodsColor}`,
                 ];
                 break;
@@ -451,7 +451,7 @@ class TesterImp {
      * @returns {Promise<void>}
      */
     async selectDrowdown(selector) {
-        const setDropdown = `${selector} > .dropdown-toggle`;
+        const setDropdown = `${selector} .dropdown-toggle`;
         await this.click(setDropdown);
     }
     /**
