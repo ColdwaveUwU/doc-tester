@@ -311,6 +311,9 @@ class TesterImp {
      */
     async inputToForm(inputText, inputFormSelector, frameName = "frameEditor") {
         try {
+            if (typeof inputText !== "string") {
+                inputText = String(inputText);
+            }
             const frame = await this.findFrameByName(frameName);
             await frame.waitForSelector(inputFormSelector);
             const input = await frame.$(inputFormSelector);
@@ -353,7 +356,6 @@ class TesterImp {
         const deltaY = endY - startY;
 
         const page = frame.page();
-
         const mouseDownX =
             canvasBoundingBox.x + startX + canvasBoundingBox.width / 2;
         const mouseDownY =
@@ -379,6 +381,35 @@ class TesterImp {
         await page.mouse.up();
     }
 
+    /**
+     * @param {number} x
+     * @param {number} y
+     * @param {string} frameName
+     * @returns {Promise<void>}
+     * @throws {Error}
+     */
+    async clickMouseInsideMain(x, y, frameName = "frameEditor") {
+        const frame = await this.findFrameByName(frameName);
+        const canvasSelector = "#id_main_view > #id_viewer";
+        const canvas = await frame.$(canvasSelector);
+
+        if (!canvas) {
+            throw new Error("Canvas element not found.");
+        }
+
+        const canvasBoundingBox = await canvas.boundingBox();
+        if (!canvasBoundingBox) {
+            throw new Error("Canvas element not visible.");
+        }
+
+        const page = frame.page();
+
+        const mouseDownX =
+            canvasBoundingBox.x + x + canvasBoundingBox.width / 2;
+        const mouseDownY =
+            canvasBoundingBox.y + y + canvasBoundingBox.height / 2;
+        await page.mouse.click(mouseDownX, mouseDownY);
+    }
     /**
      * @param {string} drawOption
      * @param {string} color
