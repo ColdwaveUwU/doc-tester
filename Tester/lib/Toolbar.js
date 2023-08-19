@@ -53,7 +53,7 @@ module.exports = {
     selectFontSize: async function (size) {
         await this.clickHome();
         await Tester.selectDrowdown("#slot-field-fontsize");
-        await Tester.selectByText(size, "#slot-field-fontsize");
+        await Tester.selectByText(size, "#slot-field-fontsize ul.dropdown-menu a");
     },
 
     clickHightlight: async function (color) {
@@ -64,7 +64,7 @@ module.exports = {
     clickChangeCase: async function (textCase) {
         await this.clickHome();
         await Tester.click("#id-toolbar-btn-case");
-        await Tester.selectByText(textCase, "#id-toolbar-btn-case");
+        await Tester.selectByText(textCase, "#id-toolbar-btn-case ul.dropdown-menu a");
     },
 
     clickFontColor: async function (color) {

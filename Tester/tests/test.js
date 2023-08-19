@@ -3,7 +3,7 @@ import Download
 import InsertImage
 import Draw
 //Tester.uploadTestFile('/', 'docx');
-Tester.createFile('docx');
+Tester.createFile('Document')
 //Tester.selectFileEncoding("Vietnamese (Windows)");
 Toolbar.selectFontSize('14')
 // Toolbar.clickBold();

@@ -40,6 +40,7 @@ class TesterImp {
     async launch() {
         this.browser = await puppeteer.launch(this.browserOptions);
         this.page = await this.browser.newPage();
+        this.page.goto('https://doc-linux.teamlab.info/example/');
     }
     /**
      * @param {string} [frameName="frameEditor"]
@@ -78,55 +79,46 @@ class TesterImp {
         }
     }
     /**
-     * @param {string|string[]} fileName
-     * @param {string} extension
-     * @param {string} [toFile="file"]
-     * @throws {Error}
-     * @returns {Promise<void>}
-     */
-    async uploadTestFile(fileName, extension, toFile = "file") {
-        const urlMain = "https://doc-linux.teamlab.info/example/";
-        await this.page.goto(urlMain);
-
-        if (fileName === "/") {
-            const directoryPath = path.join(__dirname, "..", "common", "file");
-            const files = fs.readdirSync(directoryPath);
-
-            if (extension) {
-                const filteredFiles = files.filter(
-                    (file) => path.extname(file) === `.${extension}`
-                );
-                fileName = filteredFiles;
-            } else {
-                fileName = files;
-            }
-        } else if (typeof fileName === "string" && fileName !== "/") {
-            fileName = [fileName];
-        } else if (!Array.isArray(fileName)) {
-            throw new Error("Invalid input for fileName");
-        }
-        for (const file of fileName) {
-            await this.uploadFile(file, toFile, ".file-upload", "");
-            await this.click("#cancelEdit", "");
-        }
-    }
-    /**
      * @param {string} fileName
-     * @param {string} frameName
+     * @param {string} toFile
      * @returns {Promise<void>}
      */
-    async openFile(fileName) {
-        const urlFile = `https://doc-linux.teamlab.info/example/editor?fileName=${fileName}`;
-        await this.page.goto(urlFile);
+    async openFile(fileName, toFile = "file") {
+        await this.uploadFile(fileName, toFile, ".file-upload", "");
+        await this.click("#cancelEdit", "none");
+        await this.selectByText(fileName, `.scroll-table-body .tableRow > .contentCells`,"none"
+        );
+
+        const target = await this.browser.waitForTarget(
+            (target) =>
+                target.url() ===
+                `https://doc-linux.teamlab.info/example/editor?fileName=${fileName}`
+        );
+        this.page = await target.page();
         await this.waitEditor();
     }
     /**
-     * @param {string} extension
+     * @param {string} buttonName
      * @returns {Promise<void>}
      */
-    async createFile(extension) {
-        const urlFile = `https://doc-linux.teamlab.info/example/editor?fileExt=${extension}`;
-        await this.page.goto(urlFile);
+    async createFile(buttonName) {
+        buttonName.trim();
+        const extension = {
+            document: 'docx',
+            spreadsheet: 'xlsx',
+            presentation: 'pptx',
+            template: 'docxf'
+        }
+        const url = `https://doc-linux.teamlab.info/example/editor?fileExt=${extension[buttonName]}`;
+        await this.page.waitForTimeout(3000);
+        await this.selectByText(buttonName, '.try-editor-list.clearFix a', 'none')
+        //todo url
+        const target = await this.browser.waitForTarget(
+            (target) =>
+                target.url() ===
+                `https://doc-linux.teamlab.info/example/editor?fileName=new.docx`
+        );
+        this.page = await target.page();
         await this.waitEditor();
     }
     /**
@@ -175,7 +167,7 @@ class TesterImp {
         } else if (!Array.isArray(buttonSelectors)) {
             throw new Error("Error");
         }
-        if (frameName === "") {
+        if (frameName === "none") {
             for (const buttonSelector of buttonSelectors) {
                 await this.page.waitForSelector(buttonSelector);
                 await this.page.click(buttonSelector);
@@ -501,21 +493,35 @@ class TesterImp {
      * @returns {Promise<void>}
      */
     async selectByText(text, selector, frameName = "frameEditor") {
-        const frame = await this.findFrameByName(frameName);
-
-        const linkElement = await frame.evaluateHandle(
-            (linkText, sel) => {
-                const links = Array.from(
-                    document.querySelectorAll(`${sel} ul.dropdown-menu a`)
-                );
-                return links.find(
-                    (link) => link.textContent.trim() === linkText
-                );
-            },
-            text,
-            selector
-        );
-
+        let linkElement;
+        if(frameName === 'none') {
+            linkElement = await this.page.evaluateHandle(
+                (linkText, sel) => {
+                    const links = Array.from(
+                        document.querySelectorAll(`${sel}`)
+                    );
+                    return links.find(
+                        (link) => link.textContent.trim() === linkText
+                    );
+                },
+                text,
+                selector
+            );
+        } else {
+            const frame = await this.findFrameByName(frameName);
+            linkElement = await frame.evaluateHandle(
+                (linkText, sel) => {
+                    const links = Array.from(
+                        document.querySelectorAll(`${sel}`)
+                    );
+                    return links.find(
+                        (link) => link.textContent.trim() === linkText
+                    );
+                },
+                text,
+                selector
+            );
+        }
         if (linkElement) {
             await linkElement.click();
         } else {
