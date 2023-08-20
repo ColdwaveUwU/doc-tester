@@ -32,7 +32,7 @@ class TesterImp {
 
         this.browserOptions = {
             headless: false,
-            //slowMo: config.config.pressSlow,
+            slowMo: config.config.pressSlow,
             //executablePath: config.config.executablePath,
             args: options[config.browser],
             defaultViewport: { width: ww, height: hh, deviceScaleFactor: 1 },
@@ -105,18 +105,14 @@ class TesterImp {
      */
     async openFile(fileName, toFile = "file") {
         await this.page.waitForTimeout(5000);
+        this.page.once("popup", (event) => {
+            this.page = event;
+            this.page.once("load", async () => {
+                await this.waitEditor();
+            });
+        });
         await this.uploadFile(fileName, toFile, ".file-upload", "none");
         await this.click("#cancelEdit", "none");
-        const [newPage] = await Promise.all([
-            new Promise((resolve) => this.page.once("popup", resolve)),
-            this.selectByText(
-                fileName,
-                `.scroll-table-body .tableRow > .contentCells`,
-                "none"
-            ),
-        ]);
-        this.page = newPage;
-        await this.waitEditor();
     }
     /**
      * @param {string} buttonName
@@ -124,16 +120,17 @@ class TesterImp {
      */
     async createFile(buttonName) {
         await this.page.waitForTimeout(2000);
-        const [newPage] = await Promise.all([
-            new Promise((resolve) => this.page.once("popup", resolve)),
-            this.selectByText(
-                buttonName,
-                ".try-editor-list.clearFix a",
-                "none"
-            ),
-        ]);
-        this.page = newPage;
-        await this.waitEditor();
+        this.page.once("popup", (event) => {
+            this.page = event;
+            this.page.once("load", async () => {
+                await this.waitEditor();
+            });
+        });
+        await this.selectByText(
+            buttonName,
+            ".try-editor-list.clearFix a",
+            "none"
+        );
     }
 
     /**
