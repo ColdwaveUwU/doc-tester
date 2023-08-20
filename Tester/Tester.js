@@ -10,12 +10,32 @@ class TesterImp {
      * @param {object} config
      */
     constructor(config) {
-        this.cacheDir = path.resolve("./work_directory/cache");
+        var ww = 1000;
+        var hh = 600;
+        var options = {
+            chrome: [
+                "--disable-infobars",
+                "--window-size=" + ww + "," + hh,
+                "--disk-cache-dir=" + this.cacheDir,
+            ],
+            firefox: [
+                "-width",
+                "" + ww,
+                "-height",
+                "" + hh,
+                "-p",
+                "firefox-test-profile",
+            ],
+        };
+
+        //options["firefox"] = [];
+
         this.browserOptions = {
             headless: false,
-            slowMo: config.config.pressSlow,
-            executablePath: config.config.executablePath,
-            args: ["--disk-cache-dir=" + this.cacheDir],
+            //slowMo: config.config.pressSlow,
+            //executablePath: config.config.executablePath,
+            args: options[config.browser],
+            defaultViewport: { width: ww, height: hh, deviceScaleFactor: 1 },
         };
         this.browser = config.browser;
         this.page = null;
@@ -40,7 +60,7 @@ class TesterImp {
     async launch() {
         this.browser = await puppeteer.launch(this.browserOptions);
         this.page = await this.browser.newPage();
-        this.page.goto('https://doc-linux.teamlab.info/example/');
+        this.page.goto("https://doc-linux.teamlab.info/example/");
     }
     /**
      * @param {string} [frameName="frameEditor"]
@@ -84,17 +104,18 @@ class TesterImp {
      * @returns {Promise<void>}
      */
     async openFile(fileName, toFile = "file") {
-        await this.uploadFile(fileName, toFile, ".file-upload", "");
+        await this.page.waitForTimeout(5000);
+        await this.uploadFile(fileName, toFile, ".file-upload", "none");
         await this.click("#cancelEdit", "none");
-        await this.selectByText(fileName, `.scroll-table-body .tableRow > .contentCells`,"none"
-        );
-
-        const target = await this.browser.waitForTarget(
-            (target) =>
-                target.url() ===
-                `https://doc-linux.teamlab.info/example/editor?fileName=${fileName}`
-        );
-        this.page = await target.page();
+        const [newPage] = await Promise.all([
+            new Promise((resolve) => this.page.once("popup", resolve)),
+            this.selectByText(
+                fileName,
+                `.scroll-table-body .tableRow > .contentCells`,
+                "none"
+            ),
+        ]);
+        this.page = newPage;
         await this.waitEditor();
     }
     /**
@@ -102,25 +123,19 @@ class TesterImp {
      * @returns {Promise<void>}
      */
     async createFile(buttonName) {
-        buttonName.trim();
-        const extension = {
-            document: 'docx',
-            spreadsheet: 'xlsx',
-            presentation: 'pptx',
-            template: 'docxf'
-        }
-        const url = `https://doc-linux.teamlab.info/example/editor?fileExt=${extension[buttonName]}`;
-        await this.page.waitForTimeout(3000);
-        await this.selectByText(buttonName, '.try-editor-list.clearFix a', 'none')
-        //todo url
-        const target = await this.browser.waitForTarget(
-            (target) =>
-                target.url() ===
-                `https://doc-linux.teamlab.info/example/editor?fileName=new.docx`
-        );
-        this.page = await target.page();
+        await this.page.waitForTimeout(2000);
+        const [newPage] = await Promise.all([
+            new Promise((resolve) => this.page.once("popup", resolve)),
+            this.selectByText(
+                buttonName,
+                ".try-editor-list.clearFix a",
+                "none"
+            ),
+        ]);
+        this.page = newPage;
         await this.waitEditor();
     }
+
     /**
      *
      * @param {string} encoding
@@ -494,7 +509,7 @@ class TesterImp {
      */
     async selectByText(text, selector, frameName = "frameEditor") {
         let linkElement;
-        if(frameName === 'none') {
+        if (frameName === "none") {
             linkElement = await this.page.evaluateHandle(
                 (linkText, sel) => {
                     const links = Array.from(

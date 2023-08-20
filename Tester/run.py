@@ -72,6 +72,15 @@ with open(config_path, "r") as config_file:
     config_content = config_file.read()
 
 config = json.loads(config_content)
+os.environ["PUPPETEER_SKIP_CHROMIUM_DOWNLOAD"] = "true"
+if "browser" in config:
+    print("browser: " + config["browser"])
+    os.environ["PUPPETEER_PRODUCT"] = config["browser"]
+
+if "executablePath" in config["config"]:
+    print("executablePath: " + config["config"]["executablePath"])
+    os.environ["PUPPETEER_EXECUTABLE_PATH"] = config["config"]["executablePath"]
+
 if not is_dir("./work_directory"):
     create_dir("./work_directory")
     create_dir("./work_directory/cache")
