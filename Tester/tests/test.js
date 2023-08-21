@@ -1,14 +1,15 @@
 import Toolbar
 import Download 
 import InsertImage
-import Draw
+import Draw 
+import Color
 //Tester.uploadTestFile('/', 'docx');
 Tester.createFile('Document')
 //Tester.selectFileEncoding("Vietnamese (Windows)");
 Toolbar.selectFontSize('14')
 // Toolbar.clickBold();
 // Toolbar.clickFormControl();
-// // Toolbar.clickFontColor('Light blue, Accent 1, Lighter 60%');
+Toolbar.clickFontColor(Color.Type.Auto);
 // // Toolbar.clickHightlight('Black');
 Toolbar.clickChangeCase('UPPERCASE');
 // // Toolbar.selectFontSize('28');

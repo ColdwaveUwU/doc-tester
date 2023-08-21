@@ -42,9 +42,9 @@ class TesterImp {
     }
     /**
      * @param {string} frameName
-     * @returns {Promise<puppeteer.Frame | null>}
+     * @returns {Puppeteer.Frame | null} 
      */
-    async findFrameByName(frameName) {
+    findFrameByName(frameName) {
         const frame = this.page
             .frames()
             .find((frame) => frame.name() === frameName);
@@ -68,7 +68,7 @@ class TesterImp {
      */
     async waitEditor(frameName = "frameEditor") {
         const waitTime = 60000;
-        const frame = await this.findFrameByName(frameName);
+        const frame = this.findFrameByName(frameName);
 
         const isLoadingEditor = await frame.waitForFunction(
             () => {
@@ -104,26 +104,35 @@ class TesterImp {
      * @returns {Promise<void>}
      */
     async openFile(fileName, toFile = "file") {
-        await this.page.waitForTimeout(5000);
-        this.page.once("popup", (event) => {
-            this.page = event;
-            this.page.once("load", async () => {
-                await this.waitEditor();
+        const promise = new Promise((resolve, reject) => {
+            this.page.once("popup", (event) => {
+                this.page = event;
+                resolve();   
             });
         });
         await this.uploadFile(fileName, toFile, ".file-upload", "none");
         await this.click("#cancelEdit", "none");
+        await this.selectByText(
+            fileName,
+            `.scroll-table-body .tableRow > .contentCells`,
+            "none"
+        )
+        await promise.then(async () => {
+            await this.waitEditor();
+        })
     }
+    
+    
     /**
      * @param {string} buttonName
      * @returns {Promise<void>}
      */
     async createFile(buttonName) {
-        await this.page.waitForTimeout(2000);
-        this.page.once("popup", (event) => {
-            this.page = event;
-            this.page.once("load", async () => {
-                await this.waitEditor();
+        await this.page.waitForTimeout(5000);
+        const promise = new Promise((resolve, reject) => {
+            this.page.once("popup", (event) => {
+                this.page = event;
+                resolve();   
             });
         });
         await this.selectByText(
@@ -131,6 +140,9 @@ class TesterImp {
             ".try-editor-list.clearFix a",
             "none"
         );
+        await promise.then(async () => {
+            await this.waitEditor();
+        })
     }
 
     /**
@@ -495,8 +507,24 @@ class TesterImp {
      * @returns {Promise<void>}
      */
     async selectColor(selector, color) {
-        const setOption = `${selector} a[color-name="${color}"]`;
-        await this.click(setOption);
+        await this.click(selector);
+        switch (color.type) {
+            case 0:
+                await this.click(`${selector} li:nth-child(1)`);
+                break;
+            case 1:
+                
+                break;
+            case 2:
+                break;
+            case 3: 
+                break;
+            case 4:
+                break;
+        
+            default:
+                break;
+        }
     }
     /**
      * @param {string} txt

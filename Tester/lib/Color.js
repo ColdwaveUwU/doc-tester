@@ -1,4 +1,12 @@
 module.exports = {
+    Type : {
+        Auto       : 0,
+        Theme      : 1,
+        Standard   : 2,
+        EyeDropper : 3,
+        Custom     : 4
+    },
+    
     openColorPanel: async function (selectorDropdown) {
         await Tester.selectDrowdown(selectorDropdown);
     },
@@ -57,7 +65,7 @@ module.exports = {
 
     fontColor: async function (selectorDropdown, color) {
         await this.openColorPanel(selectorDropdown);
-        await Tester.selectColor("#id-toolbar-btn-fontcolor", color);
+        await Tester.selectColor(selectorDropdown, color);
     },
 
     shadingColor: async function (selectorDropdown, color) {
