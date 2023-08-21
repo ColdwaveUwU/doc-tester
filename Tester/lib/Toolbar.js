@@ -203,20 +203,20 @@ module.exports = {
 
     clickFontColor: async function (color) {
         await this.clickHome();
-        await Tester.selectColor("#id-toolbar-btn-fontcolor", color);
+        await Color.selectColor("#id-toolbar-btn-fontcolor", color);
     },
 
     clickShading: async function (color) {
         await this.clickHome();
-        await Tester.selectColor("#id-toolbar-btn-paracolor", color);
+        await Color.selectColor("#id-toolbar-btn-paracolor", color);
     },
     clickHightlight: async function (color) {
         await this.clickHome();
-        await Tester.selectColor("#id-toolbar-btn-highlight", color);
+        await Color.selectColor("#id-toolbar-btn-highlight", color);
     },
 
     clickClearStyle: async function () {
         await this.clickHome();
-        await Tester.click("#id-toolbar-btn-clearstyle");
+        await Color.click("#id-toolbar-btn-clearstyle");
     },
 };
