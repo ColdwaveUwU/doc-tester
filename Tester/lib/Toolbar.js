@@ -53,23 +53,18 @@ module.exports = {
     selectFontSize: async function (size) {
         await this.clickHome();
         await Tester.selectDrowdown("#slot-field-fontsize");
-        await Tester.selectByText(size, "#slot-field-fontsize ul.dropdown-menu a");
+        await Tester.selectByText(
+            size,
+            "#slot-field-fontsize ul.dropdown-menu a"
+        );
     },
-
-    clickHightlight: async function (color) {
-        await this.clickHome();
-        await Color.colorHightlight("#id-toolbar-btn-highlight", color);
-    },
-
     clickChangeCase: async function (textCase) {
         await this.clickHome();
         await Tester.click("#id-toolbar-btn-case");
-        await Tester.selectByText(textCase, "#id-toolbar-btn-case ul.dropdown-menu a");
-    },
-
-    clickFontColor: async function (color) {
-        await this.clickHome();
-        await Color.fontColor("#id-toolbar-btn-fontcolor", color);
+        await Tester.selectByText(
+            textCase,
+            "#id-toolbar-btn-case ul.dropdown-menu a"
+        );
     },
 
     clickBullets: async function (bullet) {
@@ -206,73 +201,22 @@ module.exports = {
         }
     },
 
+    clickFontColor: async function (color) {
+        await this.clickHome();
+        await Tester.selectColor("#id-toolbar-btn-fontcolor", color);
+    },
+
     clickShading: async function (color) {
         await this.clickHome();
-        await Color.shadingColor("#id-toolbar-btn-paracolor", color);
+        await Tester.selectColor("#id-toolbar-btn-paracolor", color);
     },
-
-    selectShadingCombo: async function (squareCoord = [0, 0], recY = 0) {
+    clickHightlight: async function (color) {
         await this.clickHome();
-        await Color.selectColorCombo(
-            "#id-toolbar-btn-paracolor",
-            squareCoord,
-            recY
-        );
-        await Tester.click(".footer.center > button");
-    },
-
-    selectShadingColorByText: async function (R, G, B, grid) {
-        await this.clickHome();
-        await Color.selectColorComboByInput(
-            "#id-toolbar-btn-paracolor",
-            R,
-            G,
-            B,
-            grid
-        );
-        await Tester.click(".footer.center > button");
+        await Tester.selectColor("#id-toolbar-btn-highlight", color);
     },
 
     clickClearStyle: async function () {
         await this.clickHome();
         await Tester.click("#id-toolbar-btn-clearstyle");
-    },
-
-    selectFontCombo: async function (squareCoord = [0, 0], recY = 0) {
-        await this.clickHome();
-        await Color.selectColorCombo(
-            "#id-toolbar-btn-fontcolor",
-            [squareCoord[0], squareCoord[1]],
-            recY
-        );
-        await Tester.click(".footer.center > button");
-    },
-
-    selectFontColorByText: async function (R, G, B, grid) {
-        await this.clickHome();
-        await Color.selectColorComboByInput(
-            "#id-toolbar-btn-fontcolor",
-            R,
-            G,
-            B,
-            grid
-        );
-        await Tester.click(".footer.center > button");
-    },
-
-    clickFontEyedrop: async function (x, y) {
-        offsetX = x - 1;
-        offsetY = y - 1;
-        await this.clickHome();
-        await Color.eyedropper("#id-toolbar-btn-fontcolor");
-        await Tester.clickMouseInsideMain(offsetX, offsetY);
-    },
-
-    clickShadingEyedrop: async function (x, y) {
-        offsetX = x - 1;
-        offsetY = y - 1;
-        await this.clickHome();
-        await Color.eyedropper("#id-toolbar-btn-paracolor");
-        await Tester.clickMouseInsideMain(offsetX, offsetY);
     },
 };

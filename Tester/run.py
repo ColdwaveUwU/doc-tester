@@ -115,5 +115,5 @@ for test in tests_array:
         test_content = test_content.replace(f"{module_name}.", replacement_usage)
     replace_in_file(run_file, "%%CONFIG%%", str(config_path))
     replace_in_file(run_file, "\"%%CODE%%\"", test_content)
-    #run_cmd("node", [run_file])
-    #os.remove(run_file)
+    run_cmd("node", [run_file])
+    os.remove(run_file)

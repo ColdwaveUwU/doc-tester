@@ -42,7 +42,7 @@ class TesterImp {
     }
     /**
      * @param {string} frameName
-     * @returns {Puppeteer.Frame | null} 
+     * @returns {Puppeteer.Frame | null}
      */
     findFrameByName(frameName) {
         const frame = this.page
@@ -107,7 +107,7 @@ class TesterImp {
         const promise = new Promise((resolve, reject) => {
             this.page.once("popup", (event) => {
                 this.page = event;
-                resolve();   
+                resolve();
             });
         });
         await this.uploadFile(fileName, toFile, ".file-upload", "none");
@@ -116,13 +116,12 @@ class TesterImp {
             fileName,
             `.scroll-table-body .tableRow > .contentCells`,
             "none"
-        )
+        );
         await promise.then(async () => {
             await this.waitEditor();
-        })
+        });
     }
-    
-    
+
     /**
      * @param {string} buttonName
      * @returns {Promise<void>}
@@ -132,7 +131,7 @@ class TesterImp {
         const promise = new Promise((resolve, reject) => {
             this.page.once("popup", (event) => {
                 this.page = event;
-                resolve();   
+                resolve();
             });
         });
         await this.selectByText(
@@ -142,7 +141,7 @@ class TesterImp {
         );
         await promise.then(async () => {
             await this.waitEditor();
-        })
+        });
     }
 
     /**
@@ -245,7 +244,7 @@ class TesterImp {
             x: x,
             y: y,
         };
-        const frame = await this.findFrameByName(frameName);
+        const frame = this.findFrameByName(frameName);
         const elementHandle = await frame.$(selector);
 
         if (!elementHandle) {
@@ -330,7 +329,7 @@ class TesterImp {
             if (typeof inputText !== "string") {
                 inputText = String(inputText);
             }
-            const frame = await this.findFrameByName(frameName);
+            const frame = this.findFrameByName(frameName);
             await frame.waitForSelector(inputFormSelector);
             const input = await frame.$(inputFormSelector);
             await input.type(inputText);
@@ -354,7 +353,7 @@ class TesterImp {
         endY,
         frameName = "frameEditor"
     ) {
-        const frame = await this.findFrameByName(frameName);
+        const frame = this.findFrameByName(frameName);
         const canvasSelector = selector;
         const canvas = await frame.$(canvasSelector);
 
@@ -405,7 +404,7 @@ class TesterImp {
      * @throws {Error}
      */
     async clickMouseInsideMain(x, y, frameName = "frameEditor") {
-        const frame = await this.findFrameByName(frameName);
+        const frame = this.findFrameByName(frameName);
         const canvasSelector = "#id_main_view > #id_viewer";
         const canvas = await frame.$(canvasSelector);
 
@@ -507,22 +506,64 @@ class TesterImp {
      * @returns {Promise<void>}
      */
     async selectColor(selector, color) {
-        await this.click(selector);
+        let index = 0;
+        await this.selectDrowdown(selector);
         switch (color.type) {
             case 0:
                 await this.click(`${selector} li:nth-child(1)`);
                 break;
             case 1:
-                
+                const subIndexRow = 10;
+                index = color.index + subIndexRow * color.subIndex;
+                await this.click(`${selector} a[idx="${index}"]`);
                 break;
             case 2:
+                const standartColor = 60;
+                index = color.index + standartColor;
+                await this.click(`${selector} a[idx="${index}"]`);
                 break;
-            case 3: 
+            case 3:
+                const x = color.x - 1;
+                const y = color.y - 1;
+                await this.click(`${selector} li:nth-last-child(2)`);
+                await this.clickMouseInsideMain(x, y);
                 break;
             case 4:
+                const colorInputs = [
+                    { id: "#extended-spin-r .form-control", value: color.r },
+                    { id: "#extended-spin-g .form-control", value: color.g },
+                    { id: "#extended-spin-b .form-control", value: color.b },
+                    { id: "#extended-text-color", value: color.grid },
+                ];
+                await this.click(`${selector} li:last-child`);
+                for (const input of colorInputs) {
+                    await this.click(input.id);
+                    console.log(input);
+                    await this.inputToForm(input.value, `${input.id}`);
+                }
+                await this.click(".footer.center > button");
                 break;
-        
+            case 5:
+                const recCoordX = 0;
+                const recCoordY = color.hight;
+                const squareCoordX = color.square[0];
+                const squareCoordY = color.square[1];
+                await this.click(`${selector} li:last-child`);
+                await this.mouseClickInsideElement(
+                    "#id-hsb-colorpicker .img-colorpicker",
+                    squareCoordX,
+                    squareCoordY
+                );
+                await this.mouseClickInsideElement(
+                    "#id-hsb-colorpicker .cnt-root > .img-colorpicker",
+                    recCoordX,
+                    recCoordY
+                );
+                await this.click(".footer.center > button");
+                break;
+
             default:
+                await this.click(`${selector} a[idx="${color.index}"]`);
                 break;
         }
     }
@@ -548,7 +589,7 @@ class TesterImp {
                 selector
             );
         } else {
-            const frame = await this.findFrameByName(frameName);
+            const frame = this.findFrameByName(frameName);
             linkElement = await frame.evaluateHandle(
                 (linkText, sel) => {
                     const links = Array.from(
