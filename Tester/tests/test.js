@@ -1,8 +1,5 @@
-import Toolbar
-import Download 
-import InsertImage
-import Draw 
-import Color
+const Toolbar = require('../lib/Toolbar')
+const Color = require('../lib/Color')
 //Tester.uploadTestFile('/', 'docx');
 Tester.openFile('new.docx')
 //Tester.selectFileEncoding("Vietnamese (Windows)");

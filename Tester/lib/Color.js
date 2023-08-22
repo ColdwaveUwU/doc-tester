@@ -12,26 +12,26 @@ module.exports = {
         let index = 0;
         await Tester.selectDrowdown(selector);
         switch (color.type) {
-            case 0:
+            case this.Type.Auto:
                 await Tester.click(`${selector} li:nth-child(1)`);
                 break;
-            case 1:
+            case this.Type.Theme:
                 const subIndexRow = 10;
                 index = color.index + subIndexRow * color.subIndex;
                 await Tester.click(`${selector} a[idx="${index}"]`);
                 break;
-            case 2:
+            case this.Type.Standard:
                 const standartColor = 60;
                 index = color.index + standartColor;
                 await Tester.click(`${selector} a[idx="${index}"]`);
                 break;
-            case 3:
+            case this.Type.EyeDropper:
                 const x = color.x - 1;
                 const y = color.y - 1;
                 await Tester.click(`${selector} li:nth-last-child(2)`);
                 await Tester.clickMouseInsideMain(x, y);
                 break;
-            case 4:
+            case this.Type.Custom:
                 const colorInputs = [
                     { id: "#extended-spin-r .form-control", value: color.r },
                     { id: "#extended-spin-g .form-control", value: color.g },
@@ -46,7 +46,7 @@ module.exports = {
                 }
                 await Tester.click(".footer.center > button");
                 break;
-            case 5:
+            case this.Type.CustomClick:
                 const recCoordX = 0;
                 const recCoordY = color.hight;
                 const squareCoordX = color.square[0];
