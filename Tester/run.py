@@ -35,7 +35,7 @@ def open_new_terminal(test_file):
     if system == "Windows":
         command = f"start /wait cmd /c node {test_file}"
     elif system == "Linux":
-        command = f"x-terminal-emulator -e 'bash -c node {test_file} && wait'"
+        command = f"x-terminal-emulator -e 'node {test_file}' & wait"
     else:
         print(f"Unknown system: {system}")
         return
