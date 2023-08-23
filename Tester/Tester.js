@@ -63,7 +63,7 @@ class TesterImp {
         this.page.goto("https://doc-linux.teamlab.info/example/");
     }
     /**
-     * @param {string} [frameName="frameEditor"]
+     * @param {string} frameName
      * @returns {Promise<void>}
      */
     async waitEditor(frameName = "frameEditor") {
@@ -145,10 +145,8 @@ class TesterImp {
     }
 
     /**
-     *
      * @param {string} encoding
-     * @param {string} [frameName="frameEditor"]
-     * @throws {Error}
+     * @param {string} frameName
      * @returns {Promise<void>}
      */
     async selectFileEncoding(encoding, frameName = "frameEditor") {
@@ -180,7 +178,7 @@ class TesterImp {
 
     /**
      * @param {string|string[]} buttonSelectors
-     * @param {string} [frameName="frameEditor"]
+     * @param {string} frameName
      * @throws {Error}
      * @returns {Promise<void>}
      */
@@ -235,7 +233,7 @@ class TesterImp {
      * @param {string} selector
      * @param {number} x
      * @param {number} y
-     * @param {string} [frameName="frameEditor"]
+     * @param {string} frameName
      * @throws {Error}
      * @returns {Promise<void>}
      */
@@ -261,8 +259,7 @@ class TesterImp {
     }
     /**
      * @param {string} extension
-     * @param {string} [txtEncoding="Unicode (UTF-8)"]
-     * @param {string} [frameName="frameEditor"]
+     * @param {string} txtEncoding
      * @returns {Promise<void>}
      */
     async downloadFile(extension, txtEncoding = "Unicode (UTF-8)") {
@@ -338,11 +335,12 @@ class TesterImp {
         }
     }
     /**
+     * @param {string} selector
      * @param {number} startX
      * @param {number} startY
      * @param {number} endX
      * @param {number} endY
-     * @param {string} [frameName="frameEditor"]
+     * @param {string} frameName
      * @returns {Promise<void>}
      */
     async mouseDrawingLine(
@@ -428,7 +426,7 @@ class TesterImp {
     /**
      * @param {string} drawOption
      * @param {string} color
-     * @param {Number} size
+     * @param {number} size
      * @throws {Error}
      * @returns {Promise<void>}
      */
@@ -564,11 +562,13 @@ fs.readFile(filePath, "utf8", async (err, data) => {
     }
     try {
         const config = JSON.parse(data);
+        const fileName = __filename.replace(".runned.js", "");
+        console.log(path.basename(fileName));
         console.log("Contents of the JSON file:", config);
         const Tester = new TesterImp(config);
         globalThis.Tester = Tester;
         "%%CODE%%"
     } catch (error) {
-        console.error("Error when parsing JSON:", error);
+        throw new Error(`Error when parsing JSON: ${error}`);
     }
 });

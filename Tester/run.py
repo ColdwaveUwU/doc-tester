@@ -7,7 +7,6 @@ import subprocess
 import re
 import platform
 from concurrent.futures import ThreadPoolExecutor
-
 def is_file(file_path):
     return os.path.isfile(file_path)
 
@@ -34,24 +33,22 @@ def replace_in_file(file_path, old_text, new_text):
 def open_new_terminal(test_file):
     system = platform.system()
     if system == "Windows":
-        command = f"start cmd /k node {test_file}"
+        command = f"start /wait cmd /c node {test_file}"
     elif system == "Linux":
-        command = f"x-terminal-emulator -e 'node {test_file}'"
+        command = f"x-terminal-emulator -e 'bash -c node {test_file} && wait'"
     else:
         print(f"Unknown system: {system}")
         return
     try:
-        process = subprocess.Popen(command, shell=True)
-        process.wait() 
-        #todo remove
-        #os.remove(test_file)
+        subprocess.run(command, shell=True)
+        os.remove(test_file)
     except Exception as e:
         print(f"Error opening new terminal: {str(e)}")
 
 def run_test(test):
     print("run test in a new terminal: " + test)
     run_file = test + ".runned.js"
-    copy_file("./Tester.js", run_file)
+    copy_file("Tester.js", run_file)
     test_content = read_file(test)
     tester_launch = 'Tester.launch();\n'
     test_content = tester_launch + test_content

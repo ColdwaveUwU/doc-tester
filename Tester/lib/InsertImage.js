@@ -4,6 +4,9 @@ module.exports = {
     clickInsertImage: async function () {
         await Tester.click(['a[data-title="Insert"]', "#tlbtn-insertimage"]);
     },
+    /**
+     * @param {string} fileName
+     */
     fromFile: async function (fileName) {
         await this.clickInsertImage();
         await Tester.uploadFile(
@@ -12,7 +15,9 @@ module.exports = {
             "#tlbtn-insertimage li:nth-child(1)"
         );
     },
-
+    /**
+     * @param {string} url
+     */
     fromUrl: async function (url) {
         await this.clickInsertImage();
         await Tester.click("#tlbtn-insertimage li:nth-child(2)");

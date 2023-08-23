@@ -7,7 +7,10 @@ module.exports = {
         Custom: 4,
         CustomClick: 5,
     },
-
+    /**
+     * @param {string} selector
+     * @param {object} color
+     */
     selectColor: async function (selector, color) {
         let index = 0;
         await Tester.selectDrowdown(selector);
@@ -41,7 +44,6 @@ module.exports = {
                 await Tester.click(`${selector} li:last-child`);
                 for (const input of colorInputs) {
                     await Tester.click(input.id);
-                    console.log(input);
                     await Tester.inputToForm(input.value, `${input.id}`);
                 }
                 await Tester.click(".footer.center > button");

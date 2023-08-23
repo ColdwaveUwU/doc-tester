@@ -3,53 +3,49 @@ module.exports = {
     clickHome: async function () {
         await Tester.click('li a[data-title="Home"]');
     },
-
     clickBold: async function () {
         await this.clickHome();
         await Tester.click("#id-toolbar-btn-bold");
     },
-
     clickItalic: async function () {
         await this.clickHome();
         await Tester.click("#id-toolbar-btn-italic");
     },
-
     clickUnderline: async function () {
         await this.clickHome();
         await Tester.click("#id-toolbar-btn-underline");
     },
-
     clickStrikeout: async function () {
         await this.clickHome();
         await Tester.click("#id-toolbar-btn-strikeout");
     },
-
     clickSuperscript: async function () {
         await this.clickHome();
         await Tester.click("#id-toolbar-btn-superscript");
     },
-
     clickSubscript: async function () {
         await clickHome();
         await Tester.click("#id-toolbar-btn-subscript");
     },
-
     clickIncFont: async function () {
         await this.clickHome();
         await Tester.click("#id-toolbar-btn-incfont");
     },
-
     clickDecFont: async function () {
         await this.clickHome();
         await Tester.click("#id-toolbar-btn-decfont");
     },
-
+    /**
+     * @param {number | string} size
+     */
     setFontSize: async function (size) {
         await this.clickHome();
         await Tester.click("#slot-field-fontsize");
         await Tester.input(size);
     },
-
+    /**
+     * @param {string} size
+     */
     selectFontSize: async function (size) {
         await this.clickHome();
         await Tester.selectDrowdown("#slot-field-fontsize");
@@ -58,6 +54,9 @@ module.exports = {
             "#slot-field-fontsize ul.dropdown-menu a"
         );
     },
+    /**
+     * @param {string} textCase
+     */
     clickChangeCase: async function (textCase) {
         await this.clickHome();
         await Tester.click("#id-toolbar-btn-case");
@@ -66,7 +65,9 @@ module.exports = {
             "#id-toolbar-btn-case ul.dropdown-menu a"
         );
     },
-
+    /**
+     * @param {string} bullet
+     */
     clickBullets: async function (bullet) {
         bullet.toLowerCase().trim();
         await this.clickHome();
@@ -89,7 +90,9 @@ module.exports = {
             console.error(`Unknown bullet type: ${bullet}`);
         }
     },
-
+    /**
+     * @param {string} numbering
+     */
     clickNumbering: async function (numbering) {
         await this.clickHome();
         const numberingContainer = "#menu-numbering-group-lib";
@@ -111,7 +114,9 @@ module.exports = {
             console.error(`Unknown bullet type: ${numbering}`);
         }
     },
-
+    /**
+     * @param {string} multilevels
+     */
     clickMultilevels: async function (multilevels) {
         await this.clickHome();
         const multilevelsContainer = "#id-toolbar-menu-multilevels";
@@ -153,7 +158,9 @@ module.exports = {
         await this.clickHome();
         await Tester.click("#id-toolbar-btn-align-just");
     },
-
+    /**
+     * @param {string | number} font
+     */
     selectFont: async function (font) {
         await this.clickHome();
         await Tester.click("#slot-field-fontname");
@@ -170,7 +177,9 @@ module.exports = {
         await this.clickHome();
         await Tester.click("#id-toolbar-btn-incoffset");
     },
-
+    /**
+     * @param {number} select
+     */
     selectNonPrintChar: async function (select) {
         await this.clickHome();
         await Tester.selectDrowdown("#id-toolbar-btn-hidenchars");
@@ -200,16 +209,23 @@ module.exports = {
                 break;
         }
     },
-
+    /**
+     * @param {object} color
+     */
     clickFontColor: async function (color) {
         await this.clickHome();
         await Color.selectColor("#id-toolbar-btn-fontcolor", color);
     },
-
+    /**
+     * @param {object} color
+     */
     clickShading: async function (color) {
         await this.clickHome();
         await Color.selectColor("#id-toolbar-btn-paracolor", color);
     },
+    /**
+     * @param {object} color
+     */
     clickHightlight: async function (color) {
         await this.clickHome();
         await Color.selectColor("#id-toolbar-btn-highlight", color);

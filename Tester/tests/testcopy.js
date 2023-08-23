@@ -1,7 +1,7 @@
 const Toolbar = require('../lib/Toolbar')
 const Draw = require('../lib/Draw')
 //Tester.uploadTestFile('/', 'docx');
-Tester.openFile('new (2).docx')
+Tester.createFile('Document')
 Draw.penOne('Black', 0, 0, 0, 30, 30);
 // // Draw.penTwo('Red', 0, 0, 0, 30, 30);
 // // Draw.highlighter('Blue', 0, 0, 0, 30, 30);
