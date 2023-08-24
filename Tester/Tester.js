@@ -1,6 +1,15 @@
 const puppeteer = require("puppeteer");
 const fs = require("fs");
 const path = require("path");
+
+const fileName = __filename.replace(".runned.js", "");
+const profilePath = path.join(
+    __dirname,
+    "..",
+    "user_data",
+    path.basename(fileName).replace(".js", ""),
+);
+const cacheDir = path.resolve("./work_directory/cache");
 /**
  * @class
  */
@@ -16,14 +25,14 @@ class TesterImp {
             chrome: [
                 "--disable-infobars",
                 "--window-size=" + ww + "," + hh,
-                "--disk-cache-dir=" + this.cacheDir,
+                "--disk-cache-dir=" + cacheDir,
             ],
             firefox: [
                 "-width",
                 "" + ww,
                 "-height",
                 "" + hh,
-                "-p",
+                "--p",
                 "firefox-test-profile",
             ],
         };
@@ -36,6 +45,7 @@ class TesterImp {
             //executablePath: config.config.executablePath,
             args: options[config.browser],
             defaultViewport: { width: ww, height: hh, deviceScaleFactor: 1 },
+            userDataDir: profilePath
         };
         this.browser = config.browser;
         this.page = null;
@@ -104,6 +114,7 @@ class TesterImp {
      * @returns {Promise<void>}
      */
     async openFile(fileName, toFile = "file") {
+        await this.page.waitForTimeout(5000);
         const promise = new Promise((resolve, reject) => {
             this.page.once("popup", (event) => {
                 this.page = event;
@@ -304,6 +315,7 @@ class TesterImp {
                 toFile,
                 fileName
             );
+            console.log(filePath)
             const [fileChooser] = await Promise.all([
                 this.page.waitForFileChooser(),
                 this.click([selectorFileChooser], frameName),
@@ -552,8 +564,8 @@ class TesterImp {
     }
 }
 
-const fileName = "%%CONFIG%%";
-const filePath = path.resolve(__dirname, "..", fileName);
+const configName = "%%CONFIG%%";
+const filePath = path.resolve(__dirname, "..", configName);
 
 fs.readFile(filePath, "utf8", async (err, data) => {
     if (err) {
@@ -562,7 +574,6 @@ fs.readFile(filePath, "utf8", async (err, data) => {
     }
     try {
         const config = JSON.parse(data);
-        const fileName = __filename.replace(".runned.js", "");
         console.log(path.basename(fileName));
         console.log("Contents of the JSON file:", config);
         const Tester = new TesterImp(config);

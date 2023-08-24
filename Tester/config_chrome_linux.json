@@ -1,0 +1,8 @@
+{
+    "browser": "chrome",
+    "config": {
+        "headless": false,
+        "pressSlow": 50,
+        "executablePath": "/usr/bin/google-chrome-stable"
+    }
+}

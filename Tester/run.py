@@ -7,6 +7,8 @@ import subprocess
 import re
 import platform
 from concurrent.futures import ThreadPoolExecutor
+system = platform.system()
+
 def is_file(file_path):
     return os.path.isfile(file_path)
 
@@ -31,7 +33,6 @@ def replace_in_file(file_path, old_text, new_text):
         file.write(content)
 
 def open_new_terminal(test_file):
-    system = platform.system()
     if system == "Windows":
         command = f"start /wait cmd /c node {test_file}"
     elif system == "Linux":
@@ -103,6 +104,19 @@ if __name__ == "__main__":
     if not is_dir("./work_directory"):
         create_dir("./work_directory")
         create_dir("./work_directory/cache")
+    
+    if not is_dir("./user_data"):
+        create_dir("./user_data")
+    
+    for test_path in tests_array:
+        test_file_name = os.path.splitext(os.path.basename(test_path))[0]
+        user_data_path = os.path.join("./user_data", test_file_name)
+        user_profile_path = os.path.abspath(user_data_path)
+        if not is_dir(user_data_path):
+            create_dir(user_data_path)
+        if system == "Linux":
+            create_profile = f'firefox --CreateProfile "{test_file_name} {user_profile_path}"'
+            subprocess.run(create_profile, shell=True)
 
     with ThreadPoolExecutor() as executor:
         executor.map(run_test, tests_array)

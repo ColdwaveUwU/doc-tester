@@ -1,0 +1,8 @@
+{
+    "browser": "firefox",
+    "config": {
+        "headless": false,
+        "slowMo": 50,
+        "executablePath": "/usr/bin/firefox"
+    }
+}
