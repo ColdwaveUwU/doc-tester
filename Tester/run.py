@@ -9,21 +9,27 @@ import platform
 from concurrent.futures import ThreadPoolExecutor
 system = platform.system()
 
+
 def is_file(file_path):
     return os.path.isfile(file_path)
+
 
 def is_dir(dir_path):
     return os.path.isdir(dir_path)
 
+
 def create_dir(dir_path):
     os.makedirs(dir_path, exist_ok=True)
+
 
 def copy_file(src, dst):
     shutil.copyfile(src, dst)
 
+
 def read_file(file_path):
     with open(file_path, "r") as file:
         return file.read()
+
 
 def replace_in_file(file_path, old_text, new_text):
     with open(file_path, "r") as file:
@@ -31,6 +37,7 @@ def replace_in_file(file_path, old_text, new_text):
     content = content.replace(old_text, new_text)
     with open(file_path, "w") as file:
         file.write(content)
+
 
 def open_new_terminal(test_file):
     if system == "Windows":
@@ -45,6 +52,7 @@ def open_new_terminal(test_file):
         os.remove(test_file)
     except Exception as e:
         print(f"Error opening new terminal: {str(e)}")
+
 
 def run_test(test):
     print("run test in a new terminal: " + test)
@@ -63,6 +71,7 @@ def run_test(test):
     replace_in_file(run_file, "\"%%CODE%%\"", test_content)
     open_new_terminal(run_file)
 
+
 def get_tests_in_dir(directory):
     files = []
     for file in glob.glob(os.path.join(directory, "*.js")):
@@ -72,10 +81,11 @@ def get_tests_in_dir(directory):
             files += get_tests_in_dir(file)
     return files
 
+
 if __name__ == "__main__":
     script_directory = os.path.dirname(os.path.realpath(__file__))
-    test_directory = os.path.join(script_directory, "tests") 
-    
+    test_directory = os.path.join(script_directory, "tests")
+
     params = sys.argv[1:]
     if len(params) == 0:
         print("use: run.py path_to_config")
@@ -86,7 +96,6 @@ if __name__ == "__main__":
     tests_array = [test_directory]
     if is_dir(test_directory):
         tests_array = get_tests_in_dir(test_directory)
-        print(tests_array)
 
     with open(config_path, "r") as config_file:
         config_content = config_file.read()
@@ -104,10 +113,10 @@ if __name__ == "__main__":
     if not is_dir("./work_directory"):
         create_dir("./work_directory")
         create_dir("./work_directory/cache")
-    
+
     if not is_dir("./user_data"):
         create_dir("./user_data")
-    
+
     for test_path in tests_array:
         test_file_name = os.path.splitext(os.path.basename(test_path))[0]
         user_data_path = os.path.join("./user_data", test_file_name)

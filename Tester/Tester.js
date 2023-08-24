@@ -7,7 +7,7 @@ const profilePath = path.join(
     __dirname,
     "..",
     "user_data",
-    path.basename(fileName).replace(".js", ""),
+    path.basename(fileName).replace(".js", "")
 );
 const cacheDir = path.resolve("./work_directory/cache");
 /**
@@ -27,14 +27,7 @@ class TesterImp {
                 "--window-size=" + ww + "," + hh,
                 "--disk-cache-dir=" + cacheDir,
             ],
-            firefox: [
-                "-width",
-                "" + ww,
-                "-height",
-                "" + hh,
-                "--p",
-                "firefox-test-profile",
-            ],
+            firefox: ["-width", "" + ww, "-height", "" + hh],
         };
 
         //options["firefox"] = [];
@@ -45,11 +38,16 @@ class TesterImp {
             //executablePath: config.config.executablePath,
             args: options[config.browser],
             defaultViewport: { width: ww, height: hh, deviceScaleFactor: 1 },
-            userDataDir: profilePath
         };
+
+        if (config.browser === "firefox") {
+            this.browserOptions.userDataDir = profilePath;
+        }
+
         this.browser = config.browser;
         this.page = null;
     }
+
     /**
      * @param {string} frameName
      * @returns {Puppeteer.Frame | null}
@@ -315,7 +313,6 @@ class TesterImp {
                 toFile,
                 fileName
             );
-            console.log(filePath)
             const [fileChooser] = await Promise.all([
                 this.page.waitForFileChooser(),
                 this.click([selectorFileChooser], frameName),
