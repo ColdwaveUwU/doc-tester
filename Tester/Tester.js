@@ -119,7 +119,7 @@ class TesterImp {
                 resolve();
             });
         });
-        await this.uploadFile(fileName, toFile, ".file-upload", "none");
+        await this.uploadFile(fileName, toFile, "#fileupload", "none");
         await this.click("#cancelEdit", "none");
         await this.selectByText(
             fileName,
@@ -299,6 +299,14 @@ class TesterImp {
      * @throws {Error}
      * @returns {Promise<void>}
      */
+    /**
+     * @param {string} fileName
+     * @param {string} toFile
+     * @param {string} selectorFileChooser
+     * @param {string} frameName
+     * @throws {Error}
+     * @returns {Promise<void>}
+     */
     async uploadFile(
         fileName,
         toFile,
@@ -313,11 +321,29 @@ class TesterImp {
                 toFile,
                 fileName
             );
-            const [fileChooser] = await Promise.all([
-                this.page.waitForFileChooser(),
-                this.click([selectorFileChooser], frameName),
-            ]);
-            await fileChooser.accept([filePath]);
+            await this.page.evaluate(
+                (filePath, selectorFileChooser, fileName) => {
+                    const input = document.querySelector(selectorFileChooser);
+                    function triggerChangeEvent(input, filePath) {
+                        const event = new Event("change", { bubbles: true });
+                        Object.defineProperty(event, "target", {
+                            writable: false,
+                            value: input,
+                        });
+
+                        const files = [new File(["sadasdas"], fileName)];
+                        Object.defineProperty(input, "files", {
+                            value: files,
+                        });
+
+                        input.dispatchEvent(event);
+                    }
+                    triggerChangeEvent(input, filePath);
+                },
+                filePath,
+                selectorFileChooser,
+                fileName,
+            );
         } catch (error) {
             throw new Error(`Error uploading file: ${error.message}`);
         }
