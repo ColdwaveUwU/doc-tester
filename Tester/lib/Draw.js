@@ -1,6 +1,5 @@
 const Color = require("../lib/Color");
 module.exports = {
-    
     clickDraw: async function () {
         await Tester.click('li a[data-tab="draw"][data-title="Draw"]');
     },
@@ -10,6 +9,12 @@ module.exports = {
         await Tester.click("#slot-btn-draw-select");
     },
 
+    /**
+     * 
+     * @param {string} drawOption 
+     * @param {object} color 
+     * @param {number} size 
+     */
     drawFunction: async function (drawOption, color, size = 1) {
         await this.clickDraw();
         const drawMethods = {

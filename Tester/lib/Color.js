@@ -41,7 +41,10 @@ module.exports = {
                     { id: "#extended-spin-b .form-control", value: color.b },
                     { id: "#extended-text-color", value: color.grid },
                 ];
-                await Tester.selectByText("More colors", `${selector} a[type="menuitem"]`);
+                await Tester.selectByText(
+                    "More colors",
+                    `${selector} a[type="menuitem"]`
+                );
                 for (const input of colorInputs) {
                     await Tester.click(input.id);
                     await Tester.inputToForm(input.value, `${input.id}`);
@@ -53,7 +56,10 @@ module.exports = {
                 const recCoordY = color.hight;
                 const squareCoordX = color.square[0];
                 const squareCoordY = color.square[1];
-                await Tester.selectByText("More colors", `${selector} a[type="menuitem"]`);
+                await Tester.selectByText(
+                    "More colors",
+                    `${selector} a[type="menuitem"]`
+                );
                 await Tester.mouseClickInsideElement(
                     "#id-hsb-colorpicker .img-colorpicker",
                     squareCoordX,
