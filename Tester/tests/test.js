@@ -15,7 +15,7 @@ function writeToLogFile(message) {
 Tester.attachConsoleLog(writeToLogFile);
 
 //Tester.uploadTestFile('/', 'docx');
-Tester.openFile('new.docx')
+Tester.createFile('Document')
 //Tester.selectFileEncoding("Vietnamese (Windows)");
 Toolbar.selectFontSize('14')
 // Toolbar.clickBold();

@@ -490,66 +490,6 @@ class TesterImp {
         await page.mouse.click(mouseDownX, mouseDownY);
     }
     /**
-     * @param {string} drawOption
-     * @param {string} color
-     * @param {number} size
-     * @throws {Error}
-     * @returns {Promise<void>}
-     */
-    async drawFunction(drawOption, color, size = 1) {
-        const drawButtonSelector = 'li a[data-tab="draw"][data-title="Draw"]';
-        const drawMethods = {
-            pen_1: "#slot-btn-draw-pen-0",
-            pen_2: "#slot-btn-draw-pen-1",
-            highlighter: "#slot-btn-draw-pen-2",
-        };
-        const drawMethodsButton = ".inner-box-icon";
-        const dropdownColorPanel = "button.dropdown-toggle";
-        const drawMethodsColor = `div > a[color-name="${color}"]`;
-
-        let selectedOption = null;
-
-        switch (drawOption) {
-            case "pen_1":
-                selectedOption = [
-                    `${drawMethods.pen_1} ${drawMethodsButton}`,
-                    `${drawMethods.pen_1} ${dropdownColorPanel}`,
-                    `${drawMethods.pen_1}  ${drawMethodsColor}`,
-                ];
-                break;
-
-            case "pen_2":
-                selectedOption = [
-                    `${drawMethods.pen_2} ${drawMethodsButton}`,
-                    `${drawMethods.pen_2} ${dropdownColorPanel}`,
-                    `${drawMethods.pen_2}  ${drawMethodsColor}`,
-                ];
-                break;
-
-            case "highlighter":
-                selectedOption = [
-                    `${drawMethods.highlighter} ${drawMethodsButton}`,
-                    `${drawMethods.highlighter} ${dropdownColorPanel}`,
-                    `${drawMethods.highlighter}  ${drawMethodsColor}`,
-                ];
-                break;
-
-            default:
-                throw new Error("Invalid draw option");
-        }
-
-        const [penSelector, dropdownToggleSelector, colorSelector] =
-            selectedOption;
-
-        await this.click([
-            drawButtonSelector,
-            penSelector,
-            dropdownToggleSelector,
-            colorSelector,
-        ]);
-    }
-
-    /**
      * @returns {Promise<void>}
      */
     async waitAutosave() {
