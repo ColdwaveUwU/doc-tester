@@ -19,15 +19,15 @@ class TesterImp {
      * @param {object} config
      */
     constructor(config) {
-        var ww = 1000;
-        var hh = 600;
-        var options = {
+        const ww = 1000;
+        const hh = 600;
+        const options = {
             chrome: [
                 "--disable-infobars",
                 "--window-size=" + ww + "," + hh,
                 "--disk-cache-dir=" + cacheDir,
             ],
-            firefox: ["-width", "" + ww, "-height", "" + hh],
+            firefox: ["--width", "" + ww, "--height", "" + hh],
         };
 
         //options["firefox"] = [];
@@ -46,8 +46,36 @@ class TesterImp {
 
         this.browser = config.browser;
         this.page = null;
+        this.consoleLogFilter = "";
+        this.consoleLogHandler = null;
+    }
+    /**
+     * @param {string} filter
+     */
+    setConsoleLogFilter(filter) {
+        this.consoleLogFilter = filter;
+    }
+    /**
+     * @param {Function} logHandler
+     */
+    attachConsoleLog(logHandler) {
+        this.consoleLogHandler = logHandler;
     }
 
+    setupConsoleHandler() {
+        this.page.on("console", (message) => {
+            const messageText = message.text();
+            if (this.consoleLogHandler) {
+                if (messageText.startsWith(this.consoleLogFilter)) {
+                    const filteredMessage = messageText.replace(
+                        this.consoleLogFilter,
+                        ""
+                    );
+                    this.consoleLogHandler(filteredMessage);
+                }
+            }
+        });
+    }
     /**
      * @param {string} frameName
      * @returns {Puppeteer.Frame | null}
@@ -68,8 +96,10 @@ class TesterImp {
     async launch() {
         this.browser = await puppeteer.launch(this.browserOptions);
         this.page = await this.browser.newPage();
+        this.setupConsoleHandler();
         this.page.goto("https://doc-linux.teamlab.info/example/");
     }
+
     /**
      * @param {string} frameName
      * @returns {Promise<void>}
@@ -323,6 +353,7 @@ class TesterImp {
             );
             await this.page.evaluate(
                 (filePath, selectorFileChooser, fileName) => {
+                    console.log("[speed]: upload file");
                     const input = document.querySelector(selectorFileChooser);
                     function triggerChangeEvent(input, filePath) {
                         const event = new Event("change", { bubbles: true });
@@ -342,7 +373,7 @@ class TesterImp {
                 },
                 filePath,
                 selectorFileChooser,
-                fileName,
+                fileName
             );
         } catch (error) {
             throw new Error(`Error uploading file: ${error.message}`);
