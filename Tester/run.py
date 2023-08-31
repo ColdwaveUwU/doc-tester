@@ -7,6 +7,8 @@ import subprocess
 import re
 import platform
 from concurrent.futures import ThreadPoolExecutor
+import argparse
+
 system = platform.system()
 
 
@@ -51,11 +53,11 @@ def open_new_terminal(test_file):
         subprocess.run(command, shell=True)
         os.remove(test_file)
     except Exception as e:
-        print(f"Error opening new terminal: {str(e)}")
+        print(f"Error opening a new terminal: {str(e)}")
 
 
 def run_test(test):
-    print("run test in a new terminal: " + test)
+    print("Run test in a new terminal: " + test)
     run_file = test + ".runned.js"
     copy_file("Tester.js", run_file)
     test_content = read_file(test)
@@ -72,6 +74,11 @@ def run_test(test):
     open_new_terminal(run_file)
 
 
+def run_test_with_retries(test_path, num_retries):
+    for _ in range(num_retries):
+        run_test(test_path)
+
+
 def get_tests_in_dir(directory):
     files = []
     for file in glob.glob(os.path.join(directory, "*.js")):
@@ -86,28 +93,28 @@ if __name__ == "__main__":
     script_directory = os.path.dirname(os.path.realpath(__file__))
     test_directory = os.path.join(script_directory, "tests")
 
-    params = sys.argv[1:]
-    if len(params) == 0:
-        print("use: run.py path_to_config")
-        exit(0)
+    parser = argparse.ArgumentParser(description="Run tests with options")
+    parser.add_argument("config_path", help="Path to the config file")
+    parser.add_argument("test_path", nargs="?", default=test_directory,
+                        help="Path to the test or directory")
+    parser.add_argument("--retries", type=int, default=1,
+                        help="Number of test execution retries")
+    args = parser.parse_args()
 
-    config_path = params[0]
-
-    tests_array = [test_directory]
-    if is_dir(test_directory):
-        tests_array = get_tests_in_dir(test_directory)
-
+    config_path = args.config_path
+    test_dir = args.test_path 
+    num_retries = args.retries
     with open(config_path, "r") as config_file:
         config_content = config_file.read()
 
     config = json.loads(config_content)
     os.environ["PUPPETEER_SKIP_CHROMIUM_DOWNLOAD"] = "true"
     if "browser" in config:
-        print("browser: " + config["browser"])
+        print("Browser: " + config["browser"])
         os.environ["PUPPETEER_PRODUCT"] = config["browser"]
 
     if "executablePath" in config["config"]:
-        print("executablePath: " + config["config"]["executablePath"])
+        print("Executable Path: " + config["config"]["executablePath"])
         os.environ["PUPPETEER_EXECUTABLE_PATH"] = config["config"]["executablePath"]
 
     if not is_dir("./work_directory"):
@@ -116,16 +123,25 @@ if __name__ == "__main__":
 
     if not is_dir("./user_data"):
         create_dir("./user_data")
+    
+    if not os.path.exists(test_dir):
+        print(f"Error: Test path '{test_dir}' does not exist.")
+        sys.exit(1)
 
-    for test_path in tests_array:
-        test_file_name = os.path.splitext(os.path.basename(test_path))[0]
-        user_data_path = os.path.join("./user_data", test_file_name)
-        user_profile_path = os.path.abspath(user_data_path)
-        if not is_dir(user_data_path):
-            create_dir(user_data_path)
-        if system == "Linux":
-            create_profile = f'firefox --CreateProfile "{test_file_name} {user_profile_path}"'
-            subprocess.run(create_profile, shell=True)
-
-    with ThreadPoolExecutor() as executor:
-        executor.map(run_test, tests_array)
+    if os.path.isfile(test_dir):
+        run_test_with_retries(test_dir, num_retries)
+        print(test_dir)
+    elif os.path.isdir(test_dir):
+        tests_array = get_tests_in_dir(test_dir)
+        for test_path in tests_array:
+            test_file_name = os.path.splitext(os.path.basename(test_path))[0]
+            user_data_path = os.path.join("./user_data", test_file_name)
+            user_profile_path = os.path.abspath(user_data_path)
+            if not is_dir(user_data_path):
+                create_dir(user_data_path)
+            if system == "Linux":
+                create_profile = f'firefox --CreateProfile "{test_file_name} {user_profile_path}"'
+                subprocess.run(create_profile, shell=True)
+        with ThreadPoolExecutor() as executor:
+            for test_path in tests_array:
+                executor.submit(run_test_with_retries, test_path, num_retries)

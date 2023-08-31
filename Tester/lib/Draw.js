@@ -13,7 +13,7 @@ module.exports = {
      * 
      * @param {string} drawOption 
      * @param {object} color 
-     * @param {number} size 
+     * @param {string} size 
      */
     drawFunction: async function (drawOption, color, size = 1) {
         await this.clickDraw();
@@ -22,6 +22,7 @@ module.exports = {
             pen_2: "#slot-btn-draw-pen-1",
             highlighter: "#slot-btn-draw-pen-2",
         };
+        const penSizeOption = ["0.25 mm", "0.5 mm", "1 mm", "2 mm", "3.5 mm"];
         switch (drawOption) {
             case "pen_1":
                 await Color.selectColor(drawMethods.pen_1, color);

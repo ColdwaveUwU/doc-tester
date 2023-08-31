@@ -48,6 +48,7 @@ class TesterImp {
         this.page = null;
         this.consoleLogFilter = "";
         this.consoleLogHandler = null;
+        this.frame = "";
     }
     /**
      * @param {string} filter
@@ -71,23 +72,30 @@ class TesterImp {
                         this.consoleLogFilter,
                         ""
                     );
+                    FrameByName;
                     this.consoleLogHandler(filteredMessage);
                 }
             }
         });
     }
+
     /**
      * @param {string} frameName
-     * @returns {Puppeteer.Frame | null}
+     * @returns {Promise<Puppeteer.Frame | null>}
      */
-    findFrameByName(frameName) {
-        const frame = this.page
-            .frames()
-            .find((frame) => frame.name() === frameName);
+    async findFrameByName(frameName) {
+        const frame = await this.page.waitForSelector(
+            `iframe[name="${frameName}"]`
+        );
         if (frame) {
-            return frame;
+            const currentFrame = this.page
+                .frames()
+                .find((frame) => frame.name() === frameName);
+            return currentFrame;
         } else {
-            throw new Error("Invalid frame name or frame does not exist");
+            throw new Error(
+                "Invalid frame name or frame dofindFrameByNamees not exist"
+            );
         }
     }
     /**
@@ -106,23 +114,10 @@ class TesterImp {
      */
     async waitEditor(frameName = "frameEditor") {
         const waitTime = 60000;
-        const frame = this.findFrameByName(frameName);
-
-        const isLoadingEditor = await frame.waitForFunction(
-            () => {
-                const elements = document.querySelectorAll(".asc-loadmask");
-                return elements.length > 0;
-            },
-            { timeout: waitTime }
-        );
-
-        if (isLoadingEditor) {
-            console.log("Loading the editor.");
-        } else {
-            console.log("Error loading the editor.");
-        }
-
-        const isLoadedEditor = await frame.waitForFunction(
+        this.frame = await this.findFrameByName(frameName);
+        console.log("Loading the editor.");
+        await this.page.waitForTimeout(3000);
+        const isLoadedEditor = await this.frame.waitForFunction(
             () => {
                 const elements = document.querySelectorAll(".asc-loadmask");
                 return elements.length === 0;
@@ -151,6 +146,7 @@ class TesterImp {
         });
         await this.uploadFile(fileName, toFile, "#fileupload", "none");
         await this.click("#cancelEdit", "none");
+        await this.page.waitForTimeout(3000);
         await this.selectByText(
             fileName,
             `.scroll-table-body .tableRow > .contentCells`,
@@ -185,18 +181,16 @@ class TesterImp {
 
     /**
      * @param {string} encoding
-     * @param {string} frameName
      * @returns {Promise<void>}
      */
-    async selectFileEncoding(encoding, frameName = "frameEditor") {
+    async selectFileEncoding(encoding) {
         const encodingDropdown =
             '#id-codepages-combo button[data-toggle="dropdown"]';
         const okButton = 'button[result="ok"]';
         try {
             await this.page.waitForTimeout(5000);
             await this.click(encodingDropdown);
-            const frame = await this.findFrameByName(frameName);
-            const encodingElements = await frame.$$(
+            const encodingElements = await this.frame.$$(
                 "ul.dropdown-menu.scrollable-menu li div"
             );
             console.log(`Encoding Search: ${encoding}`);
@@ -217,7 +211,6 @@ class TesterImp {
 
     /**
      * @param {string|string[]} buttonSelectors
-     * @param {string} frameName
      * @throws {Error}
      * @returns {Promise<void>}
      */
@@ -234,9 +227,8 @@ class TesterImp {
             }
         } else {
             for (const buttonSelector of buttonSelectors) {
-                const frame = await this.findFrameByName(frameName);
-                await frame.waitForSelector(buttonSelector);
-                await frame.click(buttonSelector);
+                await this.frame.waitForSelector(buttonSelector);
+                await this.frame.click(buttonSelector);
             }
         }
     }
@@ -272,17 +264,15 @@ class TesterImp {
      * @param {string} selector
      * @param {number} x
      * @param {number} y
-     * @param {string} frameName
      * @throws {Error}
      * @returns {Promise<void>}
      */
-    async mouseClickInsideElement(selector, x, y, frameName = "frameEditor") {
+    async mouseClickInsideElement(selector, x, y) {
         const offset = {
             x: x,
             y: y,
         };
-        const frame = this.findFrameByName(frameName);
-        const elementHandle = await frame.$(selector);
+        const elementHandle = await this.frame.$(selector);
 
         if (!elementHandle) {
             throw new Error(`Element with selector "${selector}" not found.`);
@@ -329,14 +319,6 @@ class TesterImp {
      * @throws {Error}
      * @returns {Promise<void>}
      */
-    /**
-     * @param {string} fileName
-     * @param {string} toFile
-     * @param {string} selectorFileChooser
-     * @param {string} frameName
-     * @throws {Error}
-     * @returns {Promise<void>}
-     */
     async uploadFile(
         fileName,
         toFile,
@@ -351,30 +333,15 @@ class TesterImp {
                 toFile,
                 fileName
             );
-            await this.page.evaluate(
-                (filePath, selectorFileChooser, fileName) => {
-                    console.log("[speed]: upload file");
-                    const input = document.querySelector(selectorFileChooser);
-                    function triggerChangeEvent(input, filePath) {
-                        const event = new Event("change", { bubbles: true });
-                        Object.defineProperty(event, "target", {
-                            writable: false,
-                            value: input,
-                        });
 
-                        const files = [new File(["sadasdas"], fileName)];
-                        Object.defineProperty(input, "files", {
-                            value: files,
-                        });
+            const fileInput = await this.page.$(selectorFileChooser);
+            if (!fileInput) {
+                throw new Error(
+                    `File input element not found with selector: ${selectorFileChooser}`
+                );
+            }
 
-                        input.dispatchEvent(event);
-                    }
-                    triggerChangeEvent(input, filePath);
-                },
-                filePath,
-                selectorFileChooser,
-                fileName
-            );
+            await fileInput.uploadFile(filePath);
         } catch (error) {
             throw new Error(`Error uploading file: ${error.message}`);
         }
@@ -383,18 +350,16 @@ class TesterImp {
     /**
      * @param {string} inputText
      * @param {string} inputFormSelector
-     * @param {string} frameName
      * @throws {Error}
      * @returns {Promise<void>}
      */
-    async inputToForm(inputText, inputFormSelector, frameName = "frameEditor") {
+    async inputToForm(inputText, inputFormSelector) {
         try {
             if (typeof inputText !== "string") {
                 inputText = String(inputText);
             }
-            const frame = this.findFrameByName(frameName);
-            await frame.waitForSelector(inputFormSelector);
-            const input = await frame.$(inputFormSelector);
+            await this.frame.waitForSelector(inputFormSelector);
+            const input = await this.frame.$(inputFormSelector);
             await input.type(inputText);
         } catch (error) {
             throw new Error(`Error inputting text to form: ${error.message}`);
@@ -406,20 +371,11 @@ class TesterImp {
      * @param {number} startY
      * @param {number} endX
      * @param {number} endY
-     * @param {string} frameName
      * @returns {Promise<void>}
      */
-    async mouseDrawingLine(
-        selector,
-        startX,
-        startY,
-        endX,
-        endY,
-        frameName = "frameEditor"
-    ) {
-        const frame = this.findFrameByName(frameName);
+    async mouseDrawingLine(selector, startX, startY, endX, endY) {
         const canvasSelector = selector;
-        const canvas = await frame.$(canvasSelector);
+        const canvas = await this.frame.$(canvasSelector);
 
         if (!canvas) {
             throw new Error("Canvas element not found.");
@@ -434,7 +390,7 @@ class TesterImp {
         const deltaX = endX - startX;
         const deltaY = endY - startY;
 
-        const page = frame.page();
+        const page = this.frame.page();
         const mouseDownX =
             canvasBoundingBox.x + startX + canvasBoundingBox.width / 2;
         const mouseDownY =
@@ -463,14 +419,12 @@ class TesterImp {
     /**
      * @param {number} x
      * @param {number} y
-     * @param {string} frameName
      * @returns {Promise<void>}
      * @throws {Error}
      */
-    async clickMouseInsideMain(x, y, frameName = "frameEditor") {
-        const frame = this.findFrameByName(frameName);
+    async clickMouseInsideMain(x, y) {
         const canvasSelector = "#id_main_view > #id_viewer";
-        const canvas = await frame.$(canvasSelector);
+        const canvas = await this.frame.$(canvasSelector);
 
         if (!canvas) {
             throw new Error("Canvas element not found.");
@@ -481,7 +435,7 @@ class TesterImp {
             throw new Error("Canvas element not visible.");
         }
 
-        const page = frame.page();
+        const page = this.frame.page();
 
         const mouseDownX =
             canvasBoundingBox.x + x + canvasBoundingBox.width / 2;
@@ -526,8 +480,7 @@ class TesterImp {
                 selector
             );
         } else {
-            const frame = this.findFrameByName(frameName);
-            linkElement = await frame.evaluateHandle(
+            linkElement = await this.frame.evaluateHandle(
                 (linkText, sel) => {
                     const links = Array.from(
                         document.querySelectorAll(`${sel}`)

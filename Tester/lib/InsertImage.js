@@ -1,3 +1,4 @@
+const path = require("path");
 module.exports = {
     filePath: "image",
 
@@ -8,12 +9,19 @@ module.exports = {
      * @param {string} fileName
      */
     fromFile: async function (fileName) {
-        await this.clickInsertImage();
-        await Tester.uploadFile(
-            fileName,
+        const directoryPath = path.join(
+            __dirname,
+            "..",
+            "common",
             this.filePath,
-            "#tlbtn-insertimage li:nth-child(1)"
+            fileName
         );
+        await this.clickInsertImage();
+        const [fileChooser] = await Promise.all([
+            Tester.page.waitForFileChooser(),
+            Tester.click(["#tlbtn-insertimage li:nth-child(1)"]),
+        ]);
+        await fileChooser.accept([directoryPath]);
     },
     /**
      * @param {string} url
