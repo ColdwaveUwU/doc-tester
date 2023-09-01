@@ -1,4 +1,5 @@
 const Toolbar = require("../lib/Toolbar");
+
 Tester.createFile("Document");
 Toolbar.clickBold();
 Tester.keyPress("Enter");
@@ -16,3 +17,5 @@ Tester.keyDown("Shift");
 for (let i = 0; i < 5; i++) Tester.keyPress("ArrowLeft");
 Tester.keyUp("Shift");
 Toolbar.clickUnderline();
+
+Tester.close();

@@ -1,11 +1,11 @@
 module.exports = {
     Type: {
-        Auto: 0,
-        Theme: 1,
-        Standard: 2,
-        EyeDropper: 3,
-        Custom: 4,
-        CustomClick: 5,
+        Auto:        0,
+        Theme:       1,
+        Standard:    2,
+        EyeDropper:  3,
+        Custom:      4,
+        CustomClick: 5
     },
     /**
      * @param {string} selector
@@ -35,40 +35,40 @@ module.exports = {
                 await Tester.clickMouseInsideMain(x, y);
                 break;
             case this.Type.Custom:
-                const colorInputs = [
-                    { id: "#extended-spin-r .form-control", value: color.r },
-                    { id: "#extended-spin-g .form-control", value: color.g },
-                    { id: "#extended-spin-b .form-control", value: color.b },
-                    { id: "#extended-text-color", value: color.grid },
-                ];
                 await Tester.selectByText(
                     "More colors",
                     `${selector} a[type="menuitem"]`
                 );
-                for (const input of colorInputs) {
+                if (color.hex) {
                     await Tester.click(input.id);
-                    await Tester.inputToForm(input.value, `${input.id}`);
+                    await Tester.inputToForm(color.hex, "#extended-text-color");
+                } else {
+                    const colorInputs = [
+                        { id: "#extended-spin-r .form-control", value: color.r },
+                        { id: "#extended-spin-g .form-control", value: color.g },
+                        { id: "#extended-spin-b .form-control", value: color.b }
+                    ];
+                    for (const input of colorInputs) {
+                        await Tester.click(input.id);
+                        await Tester.inputToForm(input.value, `${input.id}`);
+                    }
                 }
                 await Tester.click(".footer.center > button");
                 break;
             case this.Type.CustomClick:
-                const recCoordX = 0;
-                const recCoordY = color.hight;
-                const squareCoordX = color.square[0];
-                const squareCoordY = color.square[1];
                 await Tester.selectByText(
                     "More colors",
                     `${selector} a[type="menuitem"]`
                 );
                 await Tester.mouseClickInsideElement(
                     "#id-hsb-colorpicker .img-colorpicker",
-                    squareCoordX,
-                    squareCoordY
+                    color.x,
+                    color.y
                 );
                 await Tester.mouseClickInsideElement(
                     "#id-hsb-colorpicker .cnt-root > .img-colorpicker",
-                    recCoordX,
-                    recCoordY
+                    0,
+                    color.hue
                 );
                 await Tester.click(".footer.center > button");
                 break;

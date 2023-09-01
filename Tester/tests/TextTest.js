@@ -1,4 +1,5 @@
 const Toolbar = require("../lib/Toolbar")
+
 Tester.createFile("Document");
 Tester.input("Hello World");
 Tester.keyDown("Shift");
@@ -8,3 +9,5 @@ Toolbar.clickBold();
 Toolbar.selectFont("Cambria");
 Toolbar.selectFontSize("36");
 Toolbar.clickFontColor({index: 8});
+
+Tester.close();
