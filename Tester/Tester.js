@@ -63,6 +63,14 @@ class TesterImp {
         this.consoleLogHandler = logHandler;
     }
 
+    /**
+     * @param {string} newUrl
+     */
+    async setUrlParams(newUrl) {
+        let url = this.page.url() + newUrl;
+        await this.page.goto(url);
+    }
+
     setupConsoleHandler() {
         this.page.on("console", (message) => {
             const messageText = message.text();
