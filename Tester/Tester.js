@@ -114,6 +114,7 @@ class TesterImp {
         this.page = await this.browser.newPage();
         this.setupConsoleHandler();
         this.page.goto("https://doc-linux.teamlab.info/example/");
+        await this.page.waitForNavigation();
     }
 
     /**
@@ -122,9 +123,12 @@ class TesterImp {
      */
     async waitEditor(frameName = "frameEditor") {
         const waitTime = 60000;
+        const isPageLoaded = await this.page.evaluate(() => {
+            return document.readyState === "complete";
+        });
+        await isPageLoaded;
         this.frame = await this.findFrameByName(frameName);
         console.log("Loading the editor.");
-        await this.page.waitForTimeout(3000);
         const isLoadedEditor = await this.frame.waitForFunction(
             () => {
                 const elements = document.querySelectorAll(".asc-loadmask");
@@ -145,7 +149,6 @@ class TesterImp {
      * @returns {Promise<void>}
      */
     async openFile(fileName, toFile = "file") {
-        await this.page.waitForTimeout(5000);
         const promise = new Promise((resolve, reject) => {
             this.page.once("popup", (event) => {
                 this.page = event;
@@ -154,7 +157,6 @@ class TesterImp {
         });
         await this.uploadFile(fileName, toFile, "#fileupload", "none");
         await this.click("#cancelEdit", "none");
-        await this.page.waitForTimeout(3000);
         await this.selectByText(
             fileName,
             `.scroll-table-body .tableRow > .contentCells`,
@@ -170,7 +172,6 @@ class TesterImp {
      * @returns {Promise<void>}
      */
     async createFile(buttonName) {
-        await this.page.waitForTimeout(5000);
         const promise = new Promise((resolve, reject) => {
             this.page.once("popup", (event) => {
                 this.page = event;
@@ -462,7 +463,7 @@ class TesterImp {
      * @param {string} selector
      * @returns {Promise<void>}
      */
-    async selectDrowdown(selector) {
+    async selectDropdown(selector) {
         const setDropdown = `${selector} .dropdown-toggle`;
         await this.click(setDropdown);
     }

@@ -48,7 +48,7 @@ module.exports = {
      */
     selectFontSize: async function (size) {
         await this.clickHome();
-        await Tester.selectDrowdown("#slot-field-fontsize");
+        await Tester.selectDropdown("#slot-field-fontsize");
         await Tester.selectByText(
             size,
             "#slot-field-fontsize ul.dropdown-menu a"
@@ -83,7 +83,7 @@ module.exports = {
             dashbullets: ".item:nth-child(9)",
         };
         const selectedBulletSelector = bulletLibrary[bullet];
-        await Tester.selectDrowdown("#id-toolbar-btn-markers");
+        await Tester.selectDropdown("#id-toolbar-btn-markers");
         if (selectedBulletSelector) {
             await Tester.click(selectedBulletSelector);
         } else {
@@ -107,7 +107,7 @@ module.exports = {
             iBrace: `${numberingContainer} .item:nth-child(8)`,
         };
         const selectedNumberingSelector = numberingLibrary[numbering];
-        await Tester.selectDrowdown("#id-toolbar-btn-numbering");
+        await Tester.selectDropdown("#id-toolbar-btn-numbering");
         if (selectedNumberingSelector) {
             await Tester.click(selectedNumberingSelector);
         } else {
@@ -131,7 +131,7 @@ module.exports = {
             variosheadings: `${multilevelsContainer} .item:nth-child(8)`,
         };
         const selectedMultilevelsSelector = multilevelsLibrary[multilevels];
-        await Tester.selectDrowdown("#id-toolbar-btn-multilevels");
+        await Tester.selectDropdown("#id-toolbar-btn-multilevels");
         if (selectedMultilevelsSelector) {
             await Tester.click(selectedMultilevelsSelector);
         } else {
@@ -182,7 +182,7 @@ module.exports = {
      */
     selectNonPrintChar: async function (select) {
         await this.clickHome();
-        await Tester.selectDrowdown("#id-toolbar-btn-hidenchars");
+        await Tester.selectDropdown("#id-toolbar-btn-hidenchars");
 
         switch (select) {
             case "nonprint":
@@ -199,7 +199,7 @@ module.exports = {
                 await Tester.click(
                     "#id-toolbar-btn-hidenchars li:nth-child(1)"
                 );
-                await Tester.selectDrowdown("#id-toolbar-btn-hidenchars");
+                await Tester.selectDropdown("#id-toolbar-btn-hidenchars");
                 await Tester.click(
                     "#id-toolbar-btn-hidenchars li:nth-child(2)"
                 );

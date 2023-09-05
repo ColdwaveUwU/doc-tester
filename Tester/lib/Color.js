@@ -13,7 +13,7 @@ module.exports = {
      */
     selectColor: async function (selector, color) {
         let index = 0;
-        await Tester.selectDrowdown(selector);
+        await Tester.selectDropdown(selector);
         switch (color.type) {
             case this.Type.Auto:
                 await Tester.click(`${selector} li:nth-child(1)`);

@@ -32,164 +32,155 @@ module.exports = {
         }
         await Tester.click(okButton);
     },
-
-    /**
-     * @param {Object} tableOptions
-     */
     setTableSettings: async function (tableOptions) {
         const okButton = 'button[result="ok"]';
-        await Tester.click("#table-advanced-link");
-        const options = [
-            "top",
-            "left",
-            "right",
-            "bottom",
-            "width",
-            "spacing",
-            "size",
-            "color",
-            "bcolor",
-            "aligment",
-            "wrapping",
-            "indent",
-            "aligment",
-            "description",
-            "title",
-        ];
+
         for (const tableOption of tableOptions) {
             switch (tableOption.type) {
                 case this.Type.Table:
-                    await Tester.click(
-                        'button[content-target="id-adv-table-width"]'
-                    );
-                    for (const prop of options) {
-                        if (tableOption.hasOwnProperty(prop)) {
-                            if (prop === "width" || prop === "spacing") {
-                                await Tester.click(
-                                    `#tableadv-checkbox-${prop} label`
-                                );
-                                await Tester.inputToForm(
-                                    tableOption[prop],
-                                    `#tableadv-number-${prop} .form-control`
-                                );
-                            } else {
-                                await Tester.inputToForm(
-                                    tableOption[prop],
-                                    `#tableadv-number-margin-table-${prop} .form-control`
-                                );
-                            }
-                        } else {
-                            console.log("Unknown options");
-                            break;
-                        }
-                    }
+                    await this.setTableProperties(tableOption);
                     break;
                 case this.Type.Cell:
-                    await Tester.click(
-                        'button[content-target="id-adv-table-cell-props"]'
-                    );
-                    for (const prop of options) {
-                        if (tableOption.hasOwnProperty(prop)) {
-                            await Tester.inputToForm(
-                                tableOption[prop],
-                                `#tableadv-number-pref${prop} .form-control`
-                            );
-                        }
-                    }
+                    await this.setCellProperties(tableOption);
                     break;
                 case this.Type.Borders:
-                    await Tester.click(
-                        'button[content-target="id-adv-table-borders"]'
-                    );
-                    for (const prop of options) {
-                        if (tableOption.hasOwnProperty(prop)) {
-                            switch (prop) {
-                                case "size":
-                                    console.log(
-                                        `li[data-value="${tableOption[prop]}"]`
-                                    );
-                                    await Tester.selectDrowdown(
-                                        "#tableadv-combo-border-size"
-                                    );
-                                    await Tester.click(
-                                        `#tableadv-combo-border-size li[data-value="${tableOption[prop]}"]`
-                                    );
-                                    break;
-                                case "color":
-                                    await Color.selectColor(
-                                        "#tableadv-border-color-btn",
-                                        tableOption[prop]
-                                    );
-                                    break;
-                                case "bcolor":
-                                    await Color.selectColor(
-                                        "#tableadv-button-table-back-color",
-                                        tableOption[prop]
-                                    );
-                                    break;
-                                default:
-                                    await Tester.click(
-                                        `#tableadv-button-border-${tableOption[prop]}`
-                                    );
-                                    break;
-                            }
-                        }
-                    }
+                    await this.setBorderProperties(tableOption);
                     break;
                 case this.Type.TextWrapping:
-                    await Tester.click(
-                        'button[content-target="id-adv-table-wrap"]'
-                    );
-                    for (const prop of options) {
-                        if (tableOption.hasOwnProperty(prop)) {
-                            switch (prop) {
-                                case "wrapping":
-                                    await Tester.click(
-                                        `#tableadv-button-wrap-${tableOption[prop]}`
-                                    );
-                                    break;
-                                case "aligment":
-                                    await Tester.click(
-                                        `#tableadv-button-align-${tableOption[prop]}`
-                                    );
-                                    break;
-                                case "indent":
-                                    await Tester.inputToForm(
-                                        tableOption[prop],
-                                        "#tableadv-number-indent .form-control"
-                                    );
-                                    break;
-                                default:
-                                    console.log("Set Options");
-                            }
-                        }
-                    }
+                    await this.setTextWrappingProperties(tableOption);
+                    break;
                 case this.Type.AlternativeText:
-                    await Tester.click(
-                        'button[content-target="id-adv-table-alttext"]'
-                    );
-                    for (const prop of options) {
-                        if (tableOption.hasOwnProperty(prop)) {
-                            switch (prop) {
-                                case "title":
-                                    await Tester.inputToForm(
-                                        tableOption[prop],
-                                        "#table-advanced-alt-title .form-control "
-                                    );
-                                    break;
-                                case "description":
-                                    await Tester.inputToForm(
-                                        tableOption[prop],
-                                        "#table-advanced-alt-description"
-                                    );
-                                    break;
-                            }
-                        }
-                    }
+                    await this.setAlternativeTextProperties(tableOption);
+                    break;
                 default:
                     console.log("Unknown Object");
+                    break;
             }
         }
+
         await Tester.click(okButton);
+    },
+    setTableProperties: async function (tableOption) {
+        const props = ["top", "left", "right", "bottom", "width", "spacing"];
+        await Tester.click("#table-advanced-link");
+
+        for (const prop of props) {
+            if (tableOption.hasOwnProperty(prop)) {
+                if (prop === "width" || prop === "spacing") {
+                    await Tester.click(`#tableadv-checkbox-${prop} label`);
+                    await Tester.inputToForm(
+                        tableOption[prop],
+                        `#tableadv-number-${prop} .form-control`
+                    );
+                } else if (
+                    prop === "top" ||
+                    prop === "left" ||
+                    prop === "right" ||
+                    prop === "bottom"
+                ) {
+                    await Tester.inputToForm(
+                        tableOption[prop],
+                        `#tableadv-number-margin-table-${prop} .form-control`
+                    );
+                }
+            }
+        }
+    },
+
+    setCellProperties: async function (tableOption) {
+        const props = ["top", "left", "right", "bottom", "width", "wrap"];
+        await Tester.click('button[content-target="id-adv-table-cell-props"]');
+        for (const prop of props) {
+            if (tableOption.hasOwnProperty(prop)) {
+                if (prop === "width") {
+                    await Tester.inputToForm(
+                        tableOption[prop],
+                        `#tableadv-number-pref${prop} .form-control`
+                    );
+                } else if (
+                    prop === "top" ||
+                    prop === "left" ||
+                    prop === "right" ||
+                    prop === "bottom"
+                ) {
+                    await Tester.click("#tableadv-checkbox-margins label");
+                    await Tester.inputToForm(
+                        tableOption[prop],
+                        `#tableadv-number-margin-table-${prop} .form-control`
+                    );
+                } else if (prop === "wrap") {
+                    await Tester.click("#tableadv-checkbox-wrap label");
+                }
+            }
+        }
+    },
+
+    setBorderProperties: async function (tableOption) {
+        await Tester.click('button[content-target="id-adv-table-borders"]');
+        if (tableOption.hasOwnProperty("size")) {
+            await Tester.selectDropdown("#tableadv-combo-border-size");
+            await Tester.click(
+                `#tableadv-combo-border-size li[data-value="${tableOption["size"]}"]`
+            );
+        }
+
+        if (tableOption.hasOwnProperty("color")) {
+            await Color.selectColor(
+                "#tableadv-border-color-btn",
+                tableOption["color"]
+            );
+        }
+
+        if (tableOption.hasOwnProperty("backColor")) {
+            await Color.selectColor(
+                "#tableadv-button-table-back-color",
+                tableOption["backColor"]
+            );
+        }
+
+        if (tableOption.hasOwnProperty("setBorder")) {
+            await Tester.click(
+                `#tableadv-button-border-${tableOption["setBorder"]}`
+            );
+        }
+    },
+
+    setTextWrappingProperties: async function (tableOption) {
+        await Tester.click('button[content-target="id-adv-table-wrap"]');
+        if (tableOption.hasOwnProperty("wrapping")) {
+            await Tester.click(
+                `#tableadv-button-wrap-${tableOption["wrapping"]}`
+            );
+        }
+
+        if (tableOption.hasOwnProperty("alignment")) {
+            await Tester.click(
+                `#tableadv-button-align-${tableOption["alignment"]}`
+            );
+        }
+
+        if (tableOption.hasOwnProperty("indent")) {
+            await Tester.inputToForm(
+                tableOption["indent"],
+                "#tableadv-number-indent .form-control"
+            );
+        }
+    },
+
+    setAlternativeTextProperties: async function (tableOption) {
+        await Tester.click('button[content-target="id-adv-table-alttext"]');
+        if (tableOption.hasOwnProperty("title")) {
+            await Tester.inputToForm(
+                tableOption["title"],
+                "#table-advanced-alt-title .form-control"
+            );
+        }
+
+        if (tableOption.hasOwnProperty("description")) {
+            await Tester.inputToForm(
+                tableOption["description"],
+                "#table-advanced-alt-description"
+            );
+        }
     },
 };
