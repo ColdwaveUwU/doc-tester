@@ -1,15 +1,28 @@
 module.exports = {
+    /**
+     * @typedef {Object} Color
+     * @property {number} type
+     * @property {number} index
+     * @property {number | undefined} subIndex
+     * @property  {number | undefined} x
+     * @property {number | undefined} y
+     * @property {number | undefined} hue
+     * @property {number | undefined} hex
+     * @property {number | undefined} r
+     * @property {number | undefined} g
+     * @property {number | undefined} b
+     */
     Type: {
-        Auto:        0,
-        Theme:       1,
-        Standard:    2,
-        EyeDropper:  3,
-        Custom:      4,
-        CustomClick: 5
+        Auto:           0,
+        Theme:          1,
+        Standard:       2,
+        EyeDropper:     3,
+        Custom:         4,
+        CustomClick:    5,
     },
     /**
      * @param {string} selector
-     * @param {object} color
+     * @param {Color} color
      */
     selectColor: async function (selector, color) {
         let index = 0;
@@ -40,13 +53,22 @@ module.exports = {
                     `${selector} a[type="menuitem"]`
                 );
                 if (color.hex) {
-                    await Tester.click(input.id);
+                    await Tester.click("#extended-text-color");
                     await Tester.inputToForm(color.hex, "#extended-text-color");
                 } else {
                     const colorInputs = [
-                        { id: "#extended-spin-r .form-control", value: color.r },
-                        { id: "#extended-spin-g .form-control", value: color.g },
-                        { id: "#extended-spin-b .form-control", value: color.b }
+                        {
+                            id: "#extended-spin-r .form-control",
+                            value: color.r,
+                        },
+                        {
+                            id: "#extended-spin-g .form-control",
+                            value: color.g,
+                        },
+                        {
+                            id: "#extended-spin-b .form-control",
+                            value: color.b,
+                        },
                     ];
                     for (const input of colorInputs) {
                         await Tester.click(input.id);

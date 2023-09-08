@@ -8,4 +8,4 @@ Table.setTableSettings([
     { type: 3, aligment: "left" },
     { type: 4, title: "test", description: "test" },
 ]);
-Tester.setUrlParams("debug=true&mode=123");
+Tester.close();

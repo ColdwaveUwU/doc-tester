@@ -8,5 +8,4 @@ Download.downloadFb2();
 Download.downloadHtml();
 Download.downloadJpg();
 Download.downloadTxt("Unicode (UTF-8)");
-
-Tester.close();
+Tester.close()

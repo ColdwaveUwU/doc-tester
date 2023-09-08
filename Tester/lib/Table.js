@@ -1,5 +1,33 @@
 const Color = require("../lib/Color");
 module.exports = {
+    /**
+     * @typedef {Object} Color
+     * @property {number} index
+     * @property {number} type
+     * @property {number | undefined} subIndex
+     * @property {number | undefined} r
+     * @property {number | undefined} g
+     * @property {number | undefined} b
+     * @property {number | undefined} hex
+     * @property {number | undefined} x
+     * @property {number | undefined} y
+     * @property {number | undefined} hue
+     */
+    /**
+     * @typedef {Object} TableOptions
+     * @property {Color | undefined} color
+     * @property {number} type
+     * @property {number | undefined} top
+     * @property {number | undefined} left
+     * @property {number | undefined} right
+     * @property {number | undefined} bottom
+     * @property {number | undefined} width
+     * @property {number | undefined} spacing
+     * @property {number | undefined} size
+     * @property {string | undefined} aligment
+     * @property {string | undefined} title
+     * @property {description | undefined} description
+     */
     Type: {
         Table: 0,
         Cell: 1,
@@ -32,6 +60,9 @@ module.exports = {
         }
         await Tester.click(okButton);
     },
+    /**
+     * @param {TableOptions} tableOptions
+     */
     setTableSettings: async function (tableOptions) {
         const okButton = 'button[result="ok"]';
 
@@ -60,6 +91,9 @@ module.exports = {
 
         await Tester.click(okButton);
     },
+    /**
+     * @param {TableOptions} tableOption
+     */
     setTableProperties: async function (tableOption) {
         const props = ["top", "left", "right", "bottom", "width", "spacing"];
         await Tester.click("#table-advanced-link");
@@ -86,7 +120,9 @@ module.exports = {
             }
         }
     },
-
+    /**
+     * @param {TableOptions} tableOption
+     */
     setCellProperties: async function (tableOption) {
         const props = ["top", "left", "right", "bottom", "width", "wrap"];
         await Tester.click('button[content-target="id-adv-table-cell-props"]');
@@ -114,7 +150,9 @@ module.exports = {
             }
         }
     },
-
+    /**
+     * @param {TableOptions} tableOption
+     */
     setBorderProperties: async function (tableOption) {
         await Tester.click('button[content-target="id-adv-table-borders"]');
         if (tableOption.hasOwnProperty("size")) {
@@ -144,7 +182,9 @@ module.exports = {
             );
         }
     },
-
+    /**
+     * @param {TableOptions} tableOption
+     */
     setTextWrappingProperties: async function (tableOption) {
         await Tester.click('button[content-target="id-adv-table-wrap"]');
         if (tableOption.hasOwnProperty("wrapping")) {
@@ -166,7 +206,9 @@ module.exports = {
             );
         }
     },
-
+    /**
+     * @param {TableOptions} tableOption
+     */
     setAlternativeTextProperties: async function (tableOption) {
         await Tester.click('button[content-target="id-adv-table-alttext"]');
         if (tableOption.hasOwnProperty("title")) {
