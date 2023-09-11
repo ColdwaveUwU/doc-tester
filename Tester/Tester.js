@@ -51,7 +51,7 @@ class TesterImp {
 
         this.urlDebug = [];
         this.consoleLogFilter = "";
-        this.consoleLogHandler = null;
+        this.consoleLogHandlers = [];
         this.debugMode = false;
     }
     /**
@@ -80,12 +80,11 @@ class TesterImp {
         this.consoleLogFilter = filter;
     }
     /**
-     * @param {Function} logHandler
+     * @param {Array<Function>} logHandler
      */
     attachConsoleLog(logHandler) {
-        this.consoleLogHandler = logHandler;
+        this.consoleLogHandlers.push(logHandler);
     }
-
     /**
      * @param {string} newUrl
      */
@@ -100,13 +99,15 @@ class TesterImp {
         try {
             this.page.on("console", (message) => {
                 const messageText = message.text();
-                if (this.consoleLogHandler) {
-                    if (messageText.startsWith(this.consoleLogFilter)) {
-                        const filteredMessage = messageText.replace(
-                            this.consoleLogFilter,
-                            ""
-                        );
-                        this.consoleLogHandler(filteredMessage);
+                if (this.consoleLogHandlers.length > 0) {
+                    for (const logHandler of this.consoleLogHandlers) {
+                        if (messageText.startsWith(this.consoleLogFilter)) {
+                            const filteredMessage = messageText.replace(
+                                this.consoleLogFilter,
+                                ""
+                            );
+                            logHandler(filteredMessage);
+                        }
                     }
                 }
             });
