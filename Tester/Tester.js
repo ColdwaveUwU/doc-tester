@@ -90,7 +90,6 @@ class TesterImp {
      * @param {string} newUrl
      */
     setUrlParams(newUrl) {
-        this.debugMode = true;
         if (typeof newUrl === "string") {
             newUrl = [newUrl];
         }
@@ -200,16 +199,39 @@ class TesterImp {
      */
     async waitEditor(frameName = "frameEditor") {
         try {
-            const isPageLoaded = await this.page.evaluate(() => {
-                return document.readyState === "complete";
-            });
-            await isPageLoaded;
-            this.frame = await this.findFrameByName(frameName);
-            console.log("Loading the editor.");
-            if (await this.waitLoadMask()) {
-                console.log("The editor is loaded.");
+            if (this.debugMode) {
+                await this.setupConsoleHandler();
+                await this.checkDebugUrl();
+                await new Promise((resolve) => {
+                    const consoleLogHandler = (message) => {
+                        if (
+                            message
+                                .text()
+                                .includes("[speed]: onDocumentContentReady")
+                        ) {
+                            this.page.removeListener(
+                                "console",
+                                consoleLogHandler
+                            );
+                            resolve();
+                        }
+                    };
+                    this.page.on("console", consoleLogHandler);
+                });
+                await this.page.waitForTimeout(50);
+                this.frame = await this.findFrameByName(frameName);
             } else {
-                console.log("Error loading the editor.");
+                const isPageLoaded = await this.page.evaluate(() => {
+                    return document.readyState === "complete";
+                });
+                await isPageLoaded;
+                this.frame = await this.findFrameByName(frameName);
+                console.log("Loading the editor.");
+                if (await this.waitLoadMask()) {
+                    console.log("The editor is loaded.");
+                } else {
+                    console.log("Error loading the editor.");
+                }
             }
         } catch (error) {
             throw new Error(`Error waitEditor: ${error.message}`);
@@ -236,10 +258,6 @@ class TesterImp {
                 "none"
             );
             await promise.then(async () => {
-                if (this.debugMode === true) {
-                    await this.setupConsoleHandler();
-                    await this.checkDebugUrl();
-                }
                 await this.waitEditor();
             });
         } catch (error) {
@@ -265,10 +283,6 @@ class TesterImp {
                 "none"
             );
             await promise.then(async () => {
-                if (this.debugMode === true) {
-                    await this.setupConsoleHandler();
-                    await this.checkDebugUrl();
-                }
                 await this.waitEditor();
             });
         } catch (error) {
