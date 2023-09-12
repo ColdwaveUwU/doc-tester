@@ -1,7 +1,6 @@
 const puppeteer = require("puppeteer");
 const fs = require("fs");
 const path = require("path");
-const { error } = require("console");
 
 const fileName = __filename.replace(".runned.js", "");
 const profilePath = path.join(
@@ -50,9 +49,11 @@ class TesterImp {
         this.url = config.url;
 
         this.urlDebug = [];
+        this.urlParam = config.urlParam;
         this.consoleLogFilter = "";
         this.consoleLogHandlers = [];
-        this.debugMode = false;
+        this.debugMode =
+            config.debugMode !== undefined ? config.debugMode : false;
     }
     /**
      * @returns {Promise<void>}
@@ -75,45 +76,25 @@ class TesterImp {
     }
     /**
      * @param {string} filter
+     * @param {Function} logHandler
      */
-    setConsoleLogFilter(filter) {
-        this.consoleLogFilter = filter;
+    attachConsoleLog(filter, logHandler) {
+        if (filter && logHandler) {
+            this.consoleLogHandlers.push({ filter, handler: logHandler });
+        } else {
+            throw new Error("Set filter and logHandler parameters");
+        }
     }
-    /**
-     * @param {Array<Function>} logHandler
-     */
-    attachConsoleLog(logHandler) {
-        this.consoleLogHandlers.push(logHandler);
-    }
+
     /**
      * @param {string} newUrl
      */
     setUrlParams(newUrl) {
         this.debugMode = true;
-        this.urlDebug = newUrl;
-    }
-    /**
-     * @returns {Promise<void>}
-     */
-    async setupConsoleHandler() {
-        try {
-            this.page.on("console", (message) => {
-                const messageText = message.text();
-                if (this.consoleLogHandlers.length > 0) {
-                    for (const logHandler of this.consoleLogHandlers) {
-                        if (messageText.startsWith(this.consoleLogFilter)) {
-                            const filteredMessage = messageText.replace(
-                                this.consoleLogFilter,
-                                ""
-                            );
-                            logHandler(filteredMessage);
-                        }
-                    }
-                }
-            });
-        } catch (error) {
-            throw new Error(`Error setupConsoleHandler: ${error.message}`);
+        if (typeof newUrl === "string") {
+            newUrl = [newUrl];
         }
+        this.urlDebug = newUrl;
     }
     /**
      * @returns {Promise<void>}
@@ -122,8 +103,14 @@ class TesterImp {
         try {
             let urlDebug = this.urlDebug;
             const pageUrl = this.page.url() + "&";
-            if (typeof urlDebug === "string") {
-                urlDebug = [urlDebug];
+            if (this.urlParam) {
+                if (typeof this.urlParam === "string") {
+                    this.urlParam = [this.urlParam];
+                }
+                urlDebug.push(...this.urlParam);
+                urlDebug = urlDebug.filter((item, index, url) => {
+                    return url.indexOf(item) === index;
+                });
             }
             if (urlDebug.length !== 0) {
                 let filteredUrl = urlDebug.reduce((acc, val) => {
@@ -133,7 +120,7 @@ class TesterImp {
                         return [...acc, val];
                     }
                 }, []);
-                if (filteredUrl === 0) {
+                if (filteredUrl.length === 0) {
                     console.log("The parameters are already set in the url");
                 } else {
                     const resUrl = filteredUrl.join("&");
@@ -144,6 +131,29 @@ class TesterImp {
             }
         } catch (error) {
             throw new Error(`Error with checkDebugUrl: ${error.message}`);
+        }
+    }
+    /**
+     * @returns {Promise<void>}
+     */
+    async setupConsoleHandler() {
+        try {
+            this.page.on("console", (message) => {
+                const messageText = message.text();
+                if (this.consoleLogHandlers.length > 0) {
+                    for (const { filter, handler } of this.consoleLogHandlers) {
+                        if (messageText.startsWith(filter)) {
+                            const filteredMessage = messageText.replace(
+                                filter,
+                                ""
+                            );
+                            handler(filteredMessage);
+                        }
+                    }
+                }
+            });
+        } catch (error) {
+            throw new Error(`Error setupConsoleHandler: ${error.message}`);
         }
     }
 
