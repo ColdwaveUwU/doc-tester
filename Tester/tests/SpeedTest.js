@@ -27,3 +27,4 @@ for (const { filter, handler } of handlersLog) {
 }
 
 Tester.createFile("Document");
+Tester.close();
