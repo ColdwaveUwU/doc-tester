@@ -1,6 +1,6 @@
 const Toolbar = require("../lib/Toolbar");
 const Color = require("../lib/Color");
-Tester.setUrlParams("action={%22debug%22:true}");
+Tester.setUrlParams("action={debug:true}");
 const handlersLog = [
     {
         filter: "[speed]: ",

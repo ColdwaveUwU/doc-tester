@@ -1,7 +1,7 @@
 {
     "browser": "chrome",
     "url": "https://kim.teamlab.info/example",
-    "urlParam": "action={%22debug%22:true}",
+    "urlParam": "action={debug:true}",
     "debugMode": true,
     "config": {
         "headless": false,

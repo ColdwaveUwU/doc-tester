@@ -118,7 +118,8 @@ class TesterImp {
                 if (filteredUrl.length === undefined) {
                     console.log("The parameters are already set in the url");
                 } else {
-                    const resUrl = filteredUrl.join("&");
+                    let resUrl = filteredUrl.join("&");
+                    resUrl = resUrl.replace("debug", encodeURI(JSON.stringify("debug")))
                     await this.page.goto(pageUrl + resUrl);
                 }
             } else {
