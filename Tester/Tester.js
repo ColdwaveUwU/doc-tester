@@ -3,13 +3,10 @@ const fs = require("fs");
 const path = require("path");
 
 const fileName = __filename.replace(".runned.js", "");
-const profilePath = path.join(
-    __dirname,
-    "..",
-    "user_data",
-    path.basename(fileName).replace(".js", "")
-);
-const cacheDir = path.resolve("./work_directory/cache");
+const dirName = path.basename(fileName).replace(".js", "");
+const profilePath = path.join(__dirname, "..", "user_data", dirName);
+const cacheDir = path.join(__dirname, "..", "user_data", dirName, "cache");
+const logDirectory = path.join(__dirname, "..", "user_data", dirName, "log");
 /**
  * @typedef {JSON} Config
  */
@@ -50,7 +47,6 @@ class TesterImp {
 
         this.urlDebug = [];
         this.urlParam = config.urlParam;
-        this.consoleLogFilter = "";
         this.consoleLogHandlers = [];
         this.debugMode =
             config.debugMode !== undefined ? config.debugMode : false;
@@ -119,7 +115,7 @@ class TesterImp {
                         return [...acc, val];
                     }
                 }, []);
-                if (filteredUrl.length === 0) {
+                if (filteredUrl.length === undefined) {
                     console.log("The parameters are already set in the url");
                 } else {
                     const resUrl = filteredUrl.join("&");
@@ -437,6 +433,18 @@ class TesterImp {
             const extensionVal = `.svg-format-${extension}`;
             const dialogSelector = ".asc-window.modal.alert";
             const okButtonSelector = `${dialogSelector} button[result="ok"]`;
+            const client = await this.page.target().createCDPSession();
+            const downloadPath = path.join(
+                __dirname,
+                "..",
+                "user_data",
+                dirName,
+                "download"
+            );
+            await client.send("Page.setDownloadBehavior", {
+                behavior: "allow",
+                downloadPath: downloadPath,
+            });
             if (await this.waitLoadMask()) {
                 if (extension === "rtf") {
                     await this.click([

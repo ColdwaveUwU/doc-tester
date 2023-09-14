@@ -6,7 +6,8 @@ const handlersLog = [
         filter: "[speed]: ",
         handler: function (message) {
             const logFileName = "log.txt";
-            fs.appendFile(logFileName, message + "\n", (err) => {
+            const logFilePath = path.join(logDirectory, logFileName);
+            fs.appendFile(logFilePath, message + "\n", (err) => {
                 if (err) {
                     console.error("Error:", err);
                 } else {

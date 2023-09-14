@@ -79,6 +79,24 @@ def run_test_with_retries(test_path, num_retries):
         run_test(test_path)
 
 
+def create_user_data_for_test(test_path):
+    test_file_name = os.path.splitext(os.path.basename(test_path))[0]
+    user_data_path = os.path.join("./user_data", test_file_name)
+    user_profile_path = os.path.abspath(user_data_path)
+
+    if not is_dir(user_data_path):
+        create_dir(user_data_path)
+
+    log_directory = os.path.join(user_data_path, "log")
+    create_dir(log_directory)
+    create_dir(os.path.join(user_data_path, "cache"))
+    create_dir(os.path.join(user_data_path, "download"))
+
+    if system == "Linux":
+        create_profile = f'firefox --CreateProfile "{test_file_name} {user_profile_path}"'
+        subprocess.run(create_profile, shell=True)
+
+
 def get_tests_in_dir(directory):
     files = []
     for file in glob.glob(os.path.join(directory, "*.js")):
@@ -117,31 +135,26 @@ if __name__ == "__main__":
         print("Executable Path: " + config["config"]["executablePath"])
         os.environ["PUPPETEER_EXECUTABLE_PATH"] = config["config"]["executablePath"]
 
-    if not is_dir("./work_directory"):
-        create_dir("./work_directory")
-        create_dir("./work_directory/cache")
-
     if not is_dir("./user_data"):
         create_dir("./user_data")
+    
+    if(is_file(test_dir)):
+        test_dir = os.path.join(test_dir, "..")
+        tests_array = get_tests_in_dir(test_dir)
+        test_dir = args.test_path 
+    else:
+        tests_array = get_tests_in_dir(test_dir)
+    for test_path in tests_array:
+        create_user_data_for_test(test_path)
     
     if not os.path.exists(test_dir):
         print(f"Error: Test path '{test_dir}' does not exist.")
         sys.exit(1)
-
-    if os.path.isfile(test_dir):
+    
+    if is_file(test_dir):
         run_test_with_retries(test_dir, num_retries)
         print(test_dir)
-    elif os.path.isdir(test_dir):
-        tests_array = get_tests_in_dir(test_dir)
-        for test_path in tests_array:
-            test_file_name = os.path.splitext(os.path.basename(test_path))[0]
-            user_data_path = os.path.join("./user_data", test_file_name)
-            user_profile_path = os.path.abspath(user_data_path)
-            if not is_dir(user_data_path):
-                create_dir(user_data_path)
-            if system == "Linux":
-                create_profile = f'firefox --CreateProfile "{test_file_name} {user_profile_path}"'
-                subprocess.run(create_profile, shell=True)
+    else:
         with ThreadPoolExecutor() as executor:
             for test_path in tests_array:
                 executor.submit(run_test_with_retries, test_path, num_retries)
