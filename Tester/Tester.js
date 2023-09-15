@@ -104,7 +104,7 @@ class TesterImp {
                 }
                 urlDebug.push(...this.urlParam);
                 urlDebug = urlDebug.filter((item, index, url) => {
-                    return url.indexOf(item) === index; 1
+                    return url.indexOf(item) === index; 
                 });
             }
             if (urlDebug.length !== 0) {
